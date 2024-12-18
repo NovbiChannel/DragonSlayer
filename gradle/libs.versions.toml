@@ -3,10 +3,12 @@ kotlin = "2.1.0"
 compose-plugin = "1.7.1"
 jNativeHook = "2.2.2"
 androidx-lifecycle = "2.8.4"
+coroutines = "1.9.0"
 
 [libraries]
 #---ROOT---
 jNativeHook = { module = "com.github.kwhat:jnativehook", version.ref = "jNativeHook" }
+coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 
 #--UI--
 androidx-lifecycle-viewmodel = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "androidx-lifecycle" }
