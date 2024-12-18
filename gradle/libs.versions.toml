@@ -1,0 +1,9 @@
+[versions]
+kotlin = "2.1.0"
+jNativeHook = "2.2.2"
+
+[libraries]
+jNativeHook = { module = "com.github.kwhat:jnativehook", version.ref = "jNativeHook" }
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
