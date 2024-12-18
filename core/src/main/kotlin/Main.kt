@@ -1,26 +1,21 @@
 import com.github.kwhat.jnativehook.GlobalScreen
+import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent
 import kotlinx.coroutines.delay
+import macro.f1tof12
+import notification.sendNotification
 import java.awt.Robot
 import java.awt.event.KeyEvent
 
 suspend fun main() {
-    val robot = Robot()
-    val keyListener = KeyListener()
-
-    val keyPressConfigs = listOf(
-        KeyPressConfig(KeyEvent.VK_F1),
-        KeyPressConfig(KeyEvent.VK_F2),
-        KeyPressConfig(KeyEvent.VK_F3),
-        KeyPressConfig(KeyEvent.VK_F4),
-        KeyPressConfig(KeyEvent.VK_F5),
-        KeyPressConfig(KeyEvent.VK_F6),
-        KeyPressConfig(KeyEvent.VK_F7),
-        KeyPressConfig(KeyEvent.VK_F8),
-        KeyPressConfig(KeyEvent.VK_F9),
-        KeyPressConfig(KeyEvent.VK_F10),
-        KeyPressConfig(KeyEvent.VK_F11),
-        KeyPressConfig(KeyEvent.VK_F12, 10.min)
+    macroStart(
+        macros = f1tof12,
+        startStopKeyEvent = NativeKeyEvent.VC_P
     )
+}
+
+suspend fun macroStart(macros: List<KeyPressConfig>, startStopKeyEvent: Int) {
+    val robot = Robot()
+    val keyListener = KeyListener(startStopKeyEvent)
 
     GlobalScreen.registerNativeHook()
     GlobalScreen.addNativeKeyListener(keyListener)
@@ -32,7 +27,7 @@ suspend fun main() {
             if (keyListener.isRunning()) {
                 val currentTime = System.currentTimeMillis()
 
-                keyPressConfigs.forEach { config ->
+                macros.forEach { config ->
                     val lastPressTime = lastPressTimes[config.key] ?: 0L
                     if (currentTime - lastPressTime >= config.interval) {
                         robot.keyPress(config.key)
