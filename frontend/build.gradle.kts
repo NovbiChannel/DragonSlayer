@@ -26,6 +26,7 @@ kotlin {
 
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
+            implementation(projects.core)
         }
     }
 }
