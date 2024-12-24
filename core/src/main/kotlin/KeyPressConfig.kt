@@ -1,1 +1,5 @@
-data class KeyPressConfig(val key: Int, val interval: Long = DEFAULT_DELAY)
+data class EventConfig(
+    val eventKey: Int,
+    val delay: Long = DEFAULT_DELAY,
+    val interval: Long = 0L
+)

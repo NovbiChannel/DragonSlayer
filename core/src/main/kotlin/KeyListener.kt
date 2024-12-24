@@ -1,7 +1,6 @@
 import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent
 import com.github.kwhat.jnativehook.keyboard.NativeKeyListener
 import notification.sendNotification
-import java.awt.event.KeyEvent
 import java.util.concurrent.atomic.AtomicBoolean
 
 class KeyListener(private val startStopKeyEvent: Int): NativeKeyListener {

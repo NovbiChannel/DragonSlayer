@@ -1,10 +1,11 @@
 import com.github.kwhat.jnativehook.GlobalScreen
 import kotlinx.coroutines.delay
+import macro.LoopType
 import macro.Macro
-import macro.sumF1toF3
+import macro.leftMouseClick
 import java.awt.Robot
 
-suspend fun main() { macroStart(sumF1toF3) }
+suspend fun main() { macroStart(leftMouseClick) }
 
 suspend fun macroStart(macros: Macro) {
     val robot = Robot()
@@ -16,26 +17,50 @@ suspend fun macroStart(macros: Macro) {
     val lastPressTimes = mutableMapOf<Int, Long>()
 
     try {
-        while (true) {
-            if (keyListener.isRunning()) {
-                val currentTime = System.currentTimeMillis()
-
-                macros.keys.forEach { config ->
-                    val lastPressTime = lastPressTimes[config.key] ?: 0L
-                    if (currentTime - lastPressTime >= config.interval) {
-                        robot.keyPress(config.key)
-                        robot.keyRelease(config.key)
-                        lastPressTimes[config.key] = currentTime
-
-                        delay(DEFAULT_DELAY)
+        when (val loopType = macros.loopType) {
+            is LoopType.ONCE -> {
+                executeMacro(robot, lastPressTimes, macros)
+            }
+            is LoopType.INFINITE -> {
+                while (true) {
+                    if (keyListener.isRunning()) {
+                        executeMacro(robot, lastPressTimes, macros)
+                    } else {
+                        delay(100)
                     }
                 }
-            } else {
-                delay(100)
+            }
+            is LoopType.CUSTOM -> {
+                repeat(loopType.repetitions) {
+                    if (keyListener.isRunning()) {
+                        executeMacro(robot, lastPressTimes, macros)
+                    } else {
+                        delay(100)
+                    }
+                }
             }
         }
     } finally {
         GlobalScreen.unregisterNativeHook()
         println("Программа остановлена.")
+    }
+}
+
+private suspend fun executeMacro(
+    robot: Robot,
+    lastPressTimes: MutableMap<Int, Long>,
+    macros: Macro
+) {
+    macros.keys.forEach { config ->
+        val lastPressTime = lastPressTimes[config.eventKey] ?: 0L
+        val currentTime = System.currentTimeMillis()
+
+        if (currentTime - lastPressTime >= config.interval) {
+            robot.keyPress(config.eventKey)
+            robot.keyRelease(config.eventKey)
+
+            lastPressTimes[config.eventKey] = currentTime
+            delay(config.delay)
+        }
     }
 }

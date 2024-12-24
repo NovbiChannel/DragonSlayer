@@ -13,7 +13,7 @@ fun sendNotification(message: String) {
 
     try {
         val currentPath = File(".").absolutePath
-        val trayIconImage = Toolkit.getDefaultToolkit().getImage("$currentPath/core/src/main/resources/app_icon.png")
+        val trayIconImage = Toolkit.getDefaultToolkit().getImage("$currentPath/core/src/main/resources/dragon_slayer.png")
 
         if (trayIcon != null) {
             val tray = SystemTray.getSystemTray()
