@@ -30,3 +30,5 @@ pluginManagement {
 include(":core")
 findProject(":core")?.name = "core"
 include(":frontend")
+include("server")
+include("tgb")

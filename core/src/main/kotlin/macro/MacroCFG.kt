@@ -1,20 +1,23 @@
 package macro
 
 import KeyPressConfig
-import min
+import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent
 import java.awt.event.KeyEvent
 
-val f1tof12 = listOf(
-    KeyPressConfig(KeyEvent.VK_F1),
-    KeyPressConfig(KeyEvent.VK_F2),
-    KeyPressConfig(KeyEvent.VK_F3),
-    KeyPressConfig(KeyEvent.VK_F4),
-    KeyPressConfig(KeyEvent.VK_F5),
-    KeyPressConfig(KeyEvent.VK_F6),
-    KeyPressConfig(KeyEvent.VK_F7),
-    KeyPressConfig(KeyEvent.VK_F8),
-    KeyPressConfig(KeyEvent.VK_F9),
-    KeyPressConfig(KeyEvent.VK_F10),
-    KeyPressConfig(KeyEvent.VK_F11),
-    KeyPressConfig(KeyEvent.VK_F12, 10.min)
+data class Macro(
+    val description: String,
+    val comment: String,
+    val startStopKey: Int,
+    val keys: List<KeyPressConfig>
+)
+
+val sumF1toF3 = Macro(
+    description = "Нажатие от f1 до f3 с минимальной задержкой",
+    comment = "Yours solo target farm",
+    startStopKey = NativeKeyEvent.VC_BACKQUOTE,
+    keys = listOf(
+        KeyPressConfig(KeyEvent.VK_F1),
+        KeyPressConfig(KeyEvent.VK_F2),
+        KeyPressConfig(KeyEvent.VK_F3),
+    )
 )

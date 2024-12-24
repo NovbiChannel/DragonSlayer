@@ -1,1 +1,1 @@
-data class KeyPressConfig(val key: Int, val interval: Long = 100)
+data class KeyPressConfig(val key: Int, val interval: Long = DEFAULT_DELAY)

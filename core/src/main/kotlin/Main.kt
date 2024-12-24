@@ -1,21 +1,14 @@
 import com.github.kwhat.jnativehook.GlobalScreen
-import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent
 import kotlinx.coroutines.delay
-import macro.f1tof12
-import notification.sendNotification
+import macro.Macro
+import macro.sumF1toF3
 import java.awt.Robot
-import java.awt.event.KeyEvent
 
-suspend fun main() {
-    macroStart(
-        macros = f1tof12,
-        startStopKeyEvent = NativeKeyEvent.VC_P
-    )
-}
+suspend fun main() { macroStart(sumF1toF3) }
 
-suspend fun macroStart(macros: List<KeyPressConfig>, startStopKeyEvent: Int) {
+suspend fun macroStart(macros: Macro) {
     val robot = Robot()
-    val keyListener = KeyListener(startStopKeyEvent)
+    val keyListener = KeyListener(macros.startStopKey)
 
     GlobalScreen.registerNativeHook()
     GlobalScreen.addNativeKeyListener(keyListener)
@@ -27,14 +20,14 @@ suspend fun macroStart(macros: List<KeyPressConfig>, startStopKeyEvent: Int) {
             if (keyListener.isRunning()) {
                 val currentTime = System.currentTimeMillis()
 
-                macros.forEach { config ->
+                macros.keys.forEach { config ->
                     val lastPressTime = lastPressTimes[config.key] ?: 0L
                     if (currentTime - lastPressTime >= config.interval) {
                         robot.keyPress(config.key)
                         robot.keyRelease(config.key)
                         lastPressTimes[config.key] = currentTime
 
-                        delay(100)
+                        delay(DEFAULT_DELAY)
                     }
                 }
             } else {

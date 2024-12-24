@@ -4,11 +4,38 @@ compose-plugin = "1.7.1"
 jNativeHook = "2.2.2"
 androidx-lifecycle = "2.8.4"
 coroutines = "1.9.0"
+ktor = "3.0.2"
+tg_bot = "7.6.1"
+ksp_version = "2.1.0-1.0.29"
+config = "0.1.2"
 
 [libraries]
 #---ROOT---
 jNativeHook = { module = "com.github.kwhat:jnativehook", version.ref = "jNativeHook" }
 coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+
+#Telegram_bot
+eu-vendeli-telegramBot = { module = "eu.vendeli:telegram-bot", version.ref = "tg_bot" }
+eu-vendeli-tgWebApp = { module = "eu.vendeli:webapps", version.ref = "tg_bot" }
+eu-vendeli-ksp = { module = "eu.vendeli:ksp", version.ref = "tg_bot" }
+
+#Ktor client
+io-ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+io-ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
+io-ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+io-ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
+
+#Ktor server
+io-ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }
+io-ktor-server-netty = { module = "io.ktor:ktor-server-netty", version.ref = "ktor" }
+io-ktor-server-content-negotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor" }
+io-ktor-server-cors = { module = "io.ktor:ktor-server-cors", version.ref = "ktor" }
+
+##Ktor common
+io-ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+
+#CFG
+com-red_dove-config = { module = "com.red-dove:config", version.ref = "config" }
 
 #--UI--
 androidx-lifecycle-viewmodel = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "androidx-lifecycle" }
@@ -19,3 +46,5 @@ kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 jetbrainsCompose = { id = "org.jetbrains.compose", version.ref = "compose-plugin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp_version" }
