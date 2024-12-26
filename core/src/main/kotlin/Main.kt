@@ -1,11 +1,9 @@
 import com.github.kwhat.jnativehook.GlobalScreen
 import kotlinx.coroutines.delay
-import macro.LoopType
-import macro.Macro
-import macro.leftMouseClick
+import macro.*
 import java.awt.Robot
 
-suspend fun main() { macroStart(leftMouseClick) }
+suspend fun main() { macroStart(sumF1toF6AOE) }
 
 suspend fun macroStart(macros: Macro) {
     val robot = Robot()
@@ -18,7 +16,7 @@ suspend fun macroStart(macros: Macro) {
 
     try {
         when (val loopType = macros.loopType) {
-            is LoopType.ONCE -> {
+            is LoopType.SINGLE -> {
                 executeMacro(robot, lastPressTimes, macros)
             }
             is LoopType.INFINITE -> {

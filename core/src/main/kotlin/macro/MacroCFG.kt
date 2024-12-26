@@ -2,6 +2,7 @@ package macro
 
 import EventConfig
 import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent
+import min
 import sec
 import java.awt.event.KeyEvent
 import java.awt.event.MouseEvent
@@ -15,7 +16,7 @@ data class Macro(
 )
 
 sealed class LoopType {
-    data object ONCE: LoopType()
+    data object SINGLE: LoopType()
     data object INFINITE: LoopType()
     data class CUSTOM(val repetitions: Int): LoopType()
 }
@@ -27,8 +28,22 @@ val sumF1toF3 = Macro(
     loopType = LoopType.INFINITE,
     keys = listOf(
         EventConfig(KeyEvent.VK_F1),
+        EventConfig(KeyEvent.VK_F2),
+        EventConfig(KeyEvent.VK_F3)
+    )
+)
+val sumF1toF6AOE = Macro(
+    description = "Нажатие от f1 до f3 с минимальной задержкой",
+    comment = "Yours solo target farm",
+    startStopKey = NativeKeyEvent.VC_BACKQUOTE,
+    loopType = LoopType.INFINITE,
+    keys = listOf(
+        EventConfig(KeyEvent.VK_F1),
+        EventConfig(KeyEvent.VK_F2),
         EventConfig(KeyEvent.VK_F3),
         EventConfig(KeyEvent.VK_F4),
+        EventConfig(KeyEvent.VK_F5),
+        EventConfig(KeyEvent.VK_F6, interval = 3.min)
     )
 )
 
