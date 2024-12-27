@@ -13,8 +13,8 @@ import ru.chaglovne.l2.components.macros.ui.MacrosContent
 import ru.chaglovne.l2.components.root.ui_logic.RootComponent
 import ru.chaglovne.l2.components.settings.ui.SettingsContent
 import ru.chaglovne.l2.theme.Colors
-import ru.chaglovne.l2.ui.components.ContentView
-import ru.chaglovne.l2.ui.components.SideMenu
+import ru.chaglovne.l2.compose_ui.ContentView
+import ru.chaglovne.l2.compose_ui.SideMenu
 
 @Composable
 fun RootContent(component: RootComponent) {

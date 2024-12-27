@@ -21,6 +21,7 @@ kotlin {
             implementation(compose.foundation)
             implementation(compose.material)
             implementation(compose.ui)
+            implementation(compose.components.resources)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
             implementation(libs.decompose)
@@ -44,4 +45,7 @@ compose.desktop {
             packageVersion = "$majore.$minore.$path"
         }
     }
+}
+compose.resources {
+    generateResClass = always
 }

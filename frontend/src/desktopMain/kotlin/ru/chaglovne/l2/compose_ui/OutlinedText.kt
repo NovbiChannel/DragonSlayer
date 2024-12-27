@@ -1,4 +1,4 @@
-package ru.chaglovne.l2.ui.components
+package ru.chaglovne.l2.compose_ui
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material.LocalTextStyle
