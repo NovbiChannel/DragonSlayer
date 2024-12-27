@@ -7,6 +7,7 @@ coroutines = "1.9.0"
 ktor = "3.0.2"
 tg_bot = "7.6.1"
 ksp_version = "2.1.0-1.0.29"
+decompose = "3.2.2"
 
 [libraries]
 #---ROOT---
@@ -24,6 +25,10 @@ io-ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotl
 #--UI--
 androidx-lifecycle-viewmodel = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "androidx-lifecycle" }
 androidx-lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
+
+##Decompose
+decompose = { module = "com.arkivanov.decompose:decompose", version.ref = "decompose" }
+decompose-extensions-compose = { module = "com.arkivanov.decompose:extensions-compose", version.ref = "decompose" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

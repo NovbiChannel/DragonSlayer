@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.kotlinx.serialization)
 }
 
 kotlin {
@@ -22,11 +23,13 @@ kotlin {
             implementation(compose.ui)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
+            implementation(libs.decompose)
+            implementation(libs.decompose.extensions.compose)
+            implementation(projects.core)
         }
 
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
-            implementation(projects.core)
         }
     }
 }

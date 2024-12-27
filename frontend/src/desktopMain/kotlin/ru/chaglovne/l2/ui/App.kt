@@ -12,21 +12,5 @@ import ru.chaglovne.l2.ui.components.SideMenu
 
 @Composable
 fun App() {
-    Row(
-        Modifier
-            .fillMaxSize()
-            .background(Colors.background)
-            .padding(16.dp)
-    ) {
-        SideMenu(Modifier.weight(1f))
-        Spacer(Modifier.width(16.dp))
-        ContentView(Modifier.weight(4f)) { modifier ->
-            Box(modifier
-                .fillMaxSize()
-                .background(
-                color = Colors.primaryContainer,
-                shape = RoundedCornerShape(10.dp)
-            ))
-        }
-    }
+
 }
