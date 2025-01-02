@@ -5,9 +5,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,6 +26,7 @@ fun MacroItem(
     title: String,
     keyTitle: String
 ) {
+    var isExpand by remember { mutableStateOf(false) }
     Box(
         Modifier
             .fillMaxWidth()
@@ -82,6 +85,7 @@ fun MacroItem(
             Spacer(Modifier.width(8.dp))
             IconButton(
                 onClick = {
+                    isExpand = !isExpand
                     println("Open Settings")
                 }
             ) {
@@ -90,6 +94,25 @@ fun MacroItem(
                     contentDescription = null,
                     modifier = Modifier.size(24.dp)
                 )
+                DropdownMenu(
+                    expanded = isExpand,
+                    onDismissRequest = { isExpand = false },
+                    modifier = Modifier
+                        .background(
+                            color = Colors.background
+                        )
+                ) {
+                    DropdownMenuItem(
+                        onClick = { if (isExpand) isExpand = false }
+                    ) {
+                        Text(text = "Test1", color = Colors.textColor)
+                    }
+                    DropdownMenuItem(
+                        onClick = { if (isExpand) isExpand = false }
+                    ) {
+                        Text(text = "Test2", color = Colors.textColor)
+                    }
+                }
             }
         }
     }
