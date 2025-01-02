@@ -1,5 +1,7 @@
 import com.github.kwhat.jnativehook.GlobalScreen
 import kotlinx.coroutines.delay
+import listeners.KeyListener
+import listeners.MouseListener
 import macro.*
 import notification.sendNotification
 import java.awt.Robot
@@ -15,8 +17,11 @@ suspend fun macroStart(macros: List<Macro>) {
     val runningMacros = mutableMapOf<Macro, Boolean>()
 
     val keyListeners = macros.map { KeyListener(it, runningMacros) }
+    val mouseListeners = macros.map { MouseListener(it, runningMacros) }
+
     GlobalScreen.registerNativeHook()
     keyListeners.forEach { GlobalScreen.addNativeKeyListener(it) }
+    mouseListeners.forEach { GlobalScreen.addNativeMouseListener(it) }
 
     try {
         while (true) {
