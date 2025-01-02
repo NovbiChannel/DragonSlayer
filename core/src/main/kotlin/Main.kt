@@ -1,46 +1,48 @@
 import com.github.kwhat.jnativehook.GlobalScreen
 import kotlinx.coroutines.delay
 import macro.*
+import notification.sendNotification
 import java.awt.Robot
 
-suspend fun main() { macroStart(sumF1toF6AOE) }
+suspend fun main() {
+    val myMacros = listOf(sumF1toF3, sumF1toF4, sumF1toF6AOE)
+    macroStart(myMacros)
+}
 
-suspend fun macroStart(macros: Macro) {
+suspend fun macroStart(macros: List<Macro>) {
     val robot = Robot()
-    val keyListener = KeyListener(macros.startStopKey)
-
-    GlobalScreen.registerNativeHook()
-    GlobalScreen.addNativeKeyListener(keyListener)
-
     val lastPressTimes = mutableMapOf<Int, Long>()
+    val runningMacros = mutableMapOf<Macro, Boolean>()
+
+    val keyListeners = macros.map { KeyListener(it, runningMacros) }
+    GlobalScreen.registerNativeHook()
+    keyListeners.forEach { GlobalScreen.addNativeKeyListener(it) }
 
     try {
-        when (val loopType = macros.loopType) {
-            is LoopType.SINGLE -> {
-                executeMacro(robot, lastPressTimes, macros)
-            }
-            is LoopType.INFINITE -> {
-                while (true) {
-                    if (keyListener.isRunning()) {
-                        executeMacro(robot, lastPressTimes, macros)
-                    } else {
-                        delay(100)
-                    }
-                }
-            }
-            is LoopType.CUSTOM -> {
-                repeat(loopType.repetitions) {
-                    if (keyListener.isRunning()) {
-                        executeMacro(robot, lastPressTimes, macros)
-                    } else {
-                        delay(100)
+        while (true) {
+            macros.forEach { macro ->
+                if (runningMacros[macro] == true) {
+                    when (val loopType = macro.loopType) {
+                        is LoopType.SINGLE -> {
+                            executeMacro(robot, lastPressTimes, macro)
+                        }
+                        is LoopType.INFINITE -> {
+                            while (runningMacros[macro] == true) {
+                                executeMacro(robot, lastPressTimes, macro)
+                            }
+                        }
+                        is LoopType.CUSTOM -> {
+                            repeat(loopType.repetitions) {
+                                executeMacro(robot, lastPressTimes, macro)
+                            }
+                        }
                     }
                 }
             }
         }
     } finally {
         GlobalScreen.unregisterNativeHook()
-        println("Программа остановлена.")
+        sendNotification("Программа остановлена")
     }
 }
 
