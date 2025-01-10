@@ -1,11 +1,11 @@
 package listeners
 
+import InputType
+import Macro
 import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent
 import com.github.kwhat.jnativehook.keyboard.NativeKeyListener
 import com.github.kwhat.jnativehook.mouse.NativeMouseEvent
 import com.github.kwhat.jnativehook.mouse.NativeMouseListener
-import macro.InputType
-import macro.Macro
 import notification.sendNotification
 
 class KeyListener(

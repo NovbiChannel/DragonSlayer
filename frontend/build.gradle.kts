@@ -26,7 +26,8 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtime.compose)
             implementation(libs.decompose)
             implementation(libs.decompose.extensions.compose)
-            implementation(projects.core)
+            implementation(projects.coreModule)
+            implementation(projects.apiModule)
         }
 
         desktopMain.dependencies {
