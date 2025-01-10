@@ -13,6 +13,7 @@ dependencies {
     implementation(libs.jNativeHook)
     implementation(libs.coroutines)
     implementation(kotlin("stdlib"))
+    implementation(projects.commonModule)
 }
 
 application {

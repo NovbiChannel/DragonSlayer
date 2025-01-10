@@ -1,30 +1,13 @@
 package macro
 
 import EventConfig
+import InputType
+import LoopType
+import Macro
 import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent
 import com.github.kwhat.jnativehook.mouse.NativeMouseEvent
 import min
 import java.awt.event.KeyEvent
-
-data class Macro(
-    val title: String,
-    val description: String,
-    val comment: String,
-    val inputType: InputType,
-    val loopType: LoopType,
-    val keys: List<EventConfig>
-)
-
-sealed class LoopType {
-    data object SINGLE: LoopType()
-    data object INFINITE: LoopType()
-    data class CUSTOM(val repetitions: Int): LoopType()
-}
-
-sealed class InputType {
-    data class KEYBOARD(val value: Int): InputType()
-    data class MOUSE(val value: Int): InputType()
-}
 
 val sumF1toF3 = Macro(
     title = "Соло таргет без баланса",
@@ -49,7 +32,7 @@ val sumF1toF4 = Macro(
         EventConfig(KeyEvent.VK_F1),
         EventConfig(KeyEvent.VK_F2),
         EventConfig(KeyEvent.VK_F3),
-        EventConfig(KeyEvent.VK_F4, interval = 1.min),
+        EventConfig(KeyEvent.VK_F4),
     )
 )
 val sumF1toF6AOE = Macro(

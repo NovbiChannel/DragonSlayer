@@ -28,6 +28,10 @@ pluginManagement {
     }
 }
 include(":core")
-findProject(":core")?.name = "core"
+include(":api")
 include(":frontend")
-include("tgb")
+include(":common")
+
+findProject(":core")?.name = "core-module"
+findProject(":api")?.name = "api-module"
+findProject(":common")?.name = "common-module"
