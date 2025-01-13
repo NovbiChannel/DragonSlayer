@@ -23,11 +23,14 @@ fun SideMenu(
     snackbarHostState: SnackbarHostState,
     onMacroClick: () -> Unit,
     onEditorClick: () -> Unit,
-    onSettingsClick: () -> Unit
+    onSettingsClick: () -> Unit,
+    onProfileClick: () -> Unit
 ) {
     val macroKey = "MACRO"
     val editorKey = "EDITOR"
     val settingsKey = "SETTINGS"
+    val profileKey = "PROFILE"
+
     val scope = rememberCoroutineScope()
     var selectedTab by remember { mutableStateOf(macroKey) }
     var isActive by remember { mutableStateOf(false) }
@@ -70,6 +73,10 @@ fun SideMenu(
             AccentButton("Settings", selectedTab == settingsKey) {
                 selectedTab = settingsKey
                 onSettingsClick()
+            }
+            AccentButton("Profile", selectedTab == profileKey) {
+                selectedTab = profileKey
+                onProfileClick()
             }
             Spacer(Modifier.weight(1F))
             PlayStopButton(isActive) {

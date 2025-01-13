@@ -31,6 +31,7 @@ include(":core")
 include(":api")
 include(":frontend")
 include(":common")
+include("webCallback")
 
 findProject(":core")?.name = "core-module"
 findProject(":api")?.name = "api-module"

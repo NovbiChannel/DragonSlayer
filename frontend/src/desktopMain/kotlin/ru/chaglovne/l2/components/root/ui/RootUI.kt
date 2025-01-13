@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import ru.chaglovne.l2.components.editor.ui.EditorContent
 import ru.chaglovne.l2.components.macros.ui.MacrosContent
+import ru.chaglovne.l2.components.profile.ui.ProfileContent
 import ru.chaglovne.l2.components.root.ui_logic.RootComponent
 import ru.chaglovne.l2.components.settings.ui.SettingsContent
 import ru.chaglovne.l2.compose_ui.ContentView
@@ -36,7 +37,8 @@ fun RootContent(component: RootComponent) {
             snackbarHostState = snackbarHostState,
             onMacroClick = { component.onMacrosTabClicked() },
             onEditorClick = { component.onEditorTabClicked() },
-            onSettingsClick = { component.onSettingsTabClicked() }
+            onSettingsClick = { component.onSettingsTabClicked() },
+            onProfileClick = { component.onProfileTabClicked() }
         )
         Spacer(Modifier.width(16.dp))
         ContentView(Modifier.weight(3f)) { modifier ->
@@ -56,6 +58,7 @@ fun RootContent(component: RootComponent) {
                         is RootComponent.Child.EditorChild -> EditorContent(child.component)
                         is RootComponent.Child.MacroChild -> MacrosContent(child.component)
                         is RootComponent.Child.SettingsChild -> SettingsContent(child.component)
+                        is RootComponent.Child.ProfileChild -> ProfileContent(child.component)
                     }
                 }
             }

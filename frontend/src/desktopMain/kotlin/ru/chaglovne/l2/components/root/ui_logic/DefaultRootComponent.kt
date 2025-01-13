@@ -6,6 +6,7 @@ import com.arkivanov.decompose.value.Value
 import kotlinx.serialization.Serializable
 import ru.chaglovne.l2.components.editor.ui_logic.DefaultEditorComponent
 import ru.chaglovne.l2.components.macros.ui_logic.DefaultMacrosComponent
+import ru.chaglovne.l2.components.profile.ui_logic.DefaultProfileComponent
 import ru.chaglovne.l2.components.settings.ui_logic.DefaultSettingsComponent
 
 class DefaultRootComponent(
@@ -32,6 +33,10 @@ class DefaultRootComponent(
         navigation.bringToFront(Config.Settings)
     }
 
+    override fun onProfileTabClicked() {
+        navigation.bringToFront(Config.Profile)
+    }
+
     override fun onBackClicked() {
         navigation.pop()
     }
@@ -45,6 +50,7 @@ class DefaultRootComponent(
             Config.Editor -> RootComponent.Child.EditorChild(DefaultEditorComponent(componentContext))
             Config.Macros -> RootComponent.Child.MacroChild(DefaultMacrosComponent(componentContext))
             Config.Settings -> RootComponent.Child.SettingsChild(DefaultSettingsComponent(componentContext))
+            Config.Profile -> RootComponent.Child.ProfileChild(DefaultProfileComponent(componentContext))
         }
 
     @Serializable
@@ -55,5 +61,7 @@ class DefaultRootComponent(
         data object Editor: Config
         @Serializable
         data object Settings: Config
+        @Serializable
+        data object Profile: Config
     }
 }
