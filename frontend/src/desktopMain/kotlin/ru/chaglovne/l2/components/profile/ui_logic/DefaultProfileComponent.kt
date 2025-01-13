@@ -1,6 +1,5 @@
 package ru.chaglovne.l2.components.profile.ui_logic
 
-import ApiClient
 import com.arkivanov.decompose.ComponentContext
 import java.awt.Desktop
 import java.net.URI
@@ -14,9 +13,5 @@ class DefaultProfileComponent(
         } else {
             println("Desktop is not supported")
         }
-    }
-
-    override suspend fun interceptRedirect(url: String): String {
-        return ApiClient.interceptUrl(url)
     }
 }
