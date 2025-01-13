@@ -1,7 +1,8 @@
 import io.ktor.client.*
+import io.ktor.client.engine.cio.*
 
 object ApiClient: DragonSlayerAPI {
-    private val client = HttpClient {
+    private val client = HttpClient(CIO) {
         contentNegotiation()
     }
 

@@ -1,5 +1,6 @@
 data class Macro(
     val title: String,
+    val isPublic: Boolean = false,
     val description: String,
     val comment: String,
     val inputType: InputType,
