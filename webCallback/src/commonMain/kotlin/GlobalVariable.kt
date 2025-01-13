@@ -1,0 +1,2 @@
+val successSrc = "https://firebasestorage.googleapis.com/v0/b/beauty-admin-panel.appspot.com/o/dragon.png?alt=media&token=caf0a6d5-3c15-4bc4-8486-8371edd6453b"
+val errorSrc = "https://firebasestorage.googleapis.com/v0/b/beauty-admin-panel.appspot.com/o/sad_dragon.png?alt=media&token=da454822-33c5-43fe-80eb-5489dae77766"

@@ -1,10 +1,12 @@
 package ui
 
 import androidx.compose.runtime.Composable
+import errorSrc
 import kotlinx.browser.window
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.*
 import org.w3c.dom.url.URL
+import successSrc
 
 @Composable
 fun RootUI() {
@@ -29,57 +31,24 @@ fun RootUI() {
             }
         }
     ) {
-        Img(
-            attrs = {
-                style {
-                    width(100.px)
-                    height(100.px)
-                }
-            },
-            src = "https://firebasestorage.googleapis.com/v0/b/beauty-admin-panel.appspot.com/o/dragon.png?alt=media&token=caf0a6d5-3c15-4bc4-8486-8371edd6453b"
-        )
-
         if (state != null && deviceId != null && code != null) {
-            H1(
-                attrs = {
-                    style {
-                        fontSize(24.px)
-                        color(Color.white)
-                        textAlign("center")
-                        padding(0.px)
-                        margin(0.px)
-                    }
-                }
-            ) {
-                Text("Авторизация прошла успешно!")
-            }
-            P(
-                attrs = {
-                    style {
-                        fontSize(12.px)
-                        color(Color.white)
-                        textAlign("center")
-                        padding(0.px)
-                        margin(0.px)
-                    }
-                }
-            ) {
-                Text("Пожалуйста, вернитесь в приложение, чтобы продолжить.")
-            }
+            Success()
         } else {
-            H1(
-                attrs = {
-                    style {
-                        fontSize(24.px)
-                        color(Color.white)
-                        textAlign("center")
-                        padding(0.px)
-                        margin(0.px)
-                    }
-                }
-            ) {
-                Text("Параметр не передан")
-            }
+            Error("Упс... Что-то пошло не так, проверь консоль")
+            println("receive params:\nstate=$state\ndeviceId=$deviceId\ncode=$code")
         }
     }
+}
+
+@Composable
+fun Success() {
+    SrcImage(successSrc)
+    H1("Авторизация прошла успешно!")
+    P("Пожалуйста, вернитесь в приложение, чтобы продолжить.")
+}
+
+@Composable
+fun Error(message: String) {
+    SrcImage(errorSrc)
+    H1(message)
 }
