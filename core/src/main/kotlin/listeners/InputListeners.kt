@@ -7,6 +7,7 @@ import com.github.kwhat.jnativehook.keyboard.NativeKeyListener
 import com.github.kwhat.jnativehook.mouse.NativeMouseEvent
 import com.github.kwhat.jnativehook.mouse.NativeMouseListener
 import notification.sendNotification
+import java.awt.event.MouseEvent
 
 class KeyListener(
     private val macro: Macro,

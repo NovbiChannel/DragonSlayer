@@ -26,8 +26,11 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtime.compose)
             implementation(libs.decompose)
             implementation(libs.decompose.extensions.compose)
+            implementation(libs.jNativeHook)
+            implementation(kotlin("stdlib"))
             implementation(projects.coreModule)
             implementation(projects.apiModule)
+            implementation(projects.commonModule)
         }
 
         desktopMain.dependencies {
