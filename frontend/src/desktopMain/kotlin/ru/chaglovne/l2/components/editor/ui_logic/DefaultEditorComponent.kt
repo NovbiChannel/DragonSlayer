@@ -145,7 +145,7 @@ class DefaultEditorComponent(
                     _model.update {
                         val updatedEvents = _model.value.events.map { existingEvents ->
                             if (existingEvents.id == eventId) {
-                                existingEvents.copy(eventType = updatedType)
+                                existingEvents.copy(eventType = updatedType, title = "Задержка ${updatedType.delay}" + "мс")
                             } else {
                                 existingEvents
                             }

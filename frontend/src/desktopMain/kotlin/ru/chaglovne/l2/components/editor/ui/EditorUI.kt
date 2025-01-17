@@ -31,6 +31,8 @@ import l2macros.frontend.generated.resources.foundation_arrow_right
 import l2macros.frontend.generated.resources.repeat
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import ru.chaglovne.l2.components.dialog.ui.DialogUI
+import ru.chaglovne.l2.components.dialog.ui_logic.DefaultDialogComponent
 import ru.chaglovne.l2.components.editor.ui_logic.EditorComponent
 import ru.chaglovne.l2.compose_ui.InformingDashboard
 import ru.chaglovne.l2.compose_ui.Keyboard
@@ -276,9 +278,10 @@ fun ItemInteractions(
     isDelayEvent: Boolean,
     outputHandler: (EditorComponent.Output) -> Unit
 ) {
+    var isShowDialog by remember { mutableStateOf(false) }
     if (isDelayEvent) {
         IconButton(Res.drawable.edit_outline) {
-            println("Open dialog")
+            isShowDialog = true
         }
     }
     IconButton(Res.drawable.arrow_up) {
@@ -290,10 +293,18 @@ fun ItemInteractions(
     IconButton(Res.drawable.mdi_delete_outline) {
         outputHandler(EditorComponent.Output.Delete(eventId))
     }
+
+    if (isShowDialog) {
+        DialogUI(
+            DefaultDialogComponent(title = "Изменить время ожидания", onDismissed = { isShowDialog = false })
+        ) {
+
+        }
+    }
 }
 
 @Composable
-private fun IconButton(
+fun IconButton(
     resource: DrawableResource,
     onClick: () -> Unit
 ) {
