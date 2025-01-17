@@ -68,7 +68,8 @@ private fun CountButton(resource: DrawableResource ,onClick: () -> Unit) {
         Icon(
             painter = painterResource(resource),
             contentDescription = null,
-            modifier = Modifier.size(15.dp)
+            modifier = Modifier.size(15.dp),
+            tint = Colors.textColor
         )
     }
 }

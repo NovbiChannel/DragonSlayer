@@ -2,6 +2,7 @@ package ru.chaglovne.l2.components.editor.ui_logic
 
 import DEFAULT_DELAY
 import LoopType
+import TimeUnit
 import com.arkivanov.decompose.value.Value
 
 interface EditorComponent {
@@ -23,7 +24,7 @@ interface EditorComponent {
         val title: String
     )
     sealed class EventType {
-        data class Delay(var delay: Long = DEFAULT_DELAY): EventType()
+        data class Delay(var delay: Long = DEFAULT_DELAY, var timeUnit: TimeUnit = TimeUnit.Millisecond(DEFAULT_DELAY.toInt())): EventType()
         class MouseClick(val key: Int): EventType()
         class KeyboardClick(val key: Int): EventType()
     }

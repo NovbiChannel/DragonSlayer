@@ -2,6 +2,7 @@ package ru.chaglovne.l2.components.editor.ui_logic
 
 import DEFAULT_DELAY
 import LoopType
+import TimeUnit
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
@@ -37,6 +38,7 @@ class DefaultEditorComponent(
     }
 
     override fun onAddEvent(type: EditorComponent.EventType) {
+        val defaultDelayTitle = "Задержка $DEFAULT_DELAY" + TimeUnit.Millisecond(DEFAULT_DELAY.toInt()).getName()
         _model.update {
             val id = it.events.lastIndex + 1
             val events = when (type) {
@@ -44,7 +46,7 @@ class DefaultEditorComponent(
                     EditorComponent.Event(
                         id = id,
                         eventType = type,
-                        title = "Задержка ${type.delay}" + "мс"
+                        title = "Задержка ${type.delay}" + type.timeUnit.getName()
                     )
                 )
                 is EditorComponent.EventType.KeyboardClick -> listOf(
@@ -56,7 +58,7 @@ class DefaultEditorComponent(
                     EditorComponent.Event(
                         id = id + 1,
                         eventType = EditorComponent.EventType.Delay(),
-                        title = "Задержка $DEFAULT_DELAY" + "мс"
+                        title = defaultDelayTitle
                     )
                 )
                 is EditorComponent.EventType.MouseClick -> listOf(
@@ -68,13 +70,16 @@ class DefaultEditorComponent(
                     EditorComponent.Event(
                         id = id + 1,
                         eventType = EditorComponent.EventType.Delay(),
-                        title = "Задержка $DEFAULT_DELAY" + "мс"
+                        title = defaultDelayTitle
                     )
                 )
             }
             val updatedEvents =
                 it.events + events
-            it.copy(events = updatedEvents)
+            it.copy(
+                events = updatedEvents,
+                selectedEventId = updatedEvents.last().id
+            )
         }
     }
 
@@ -135,7 +140,10 @@ class DefaultEditorComponent(
                     _model.update {
                         val updatedEvents = _model.value.events.map { existingEvents ->
                             if (existingEvents.id == eventId) {
-                                existingEvents.copy(eventType = updatedType, title = "Задержка ${updatedType.delay}" + "мс")
+                                existingEvents.copy(
+                                    eventType = updatedType,
+                                    title = "Задержка ${updatedType.delay}" + updatedType.timeUnit.getName()
+                                )
                             } else {
                                 existingEvents
                             }

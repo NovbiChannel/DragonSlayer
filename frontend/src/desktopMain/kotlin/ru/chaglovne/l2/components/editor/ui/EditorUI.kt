@@ -2,6 +2,7 @@ package ru.chaglovne.l2.components.editor.ui
 
 import DEFAULT_DELAY
 import LoopType
+import TimeUnit
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -283,7 +284,9 @@ fun ItemInteractions(
     outputHandler: (EditorComponent.Output) -> Unit
 ) {
     var isShowDialog by remember { mutableStateOf(false) }
+    var isShowDropMenu by remember { mutableStateOf(false) }
     var delayCount by remember { mutableStateOf(DEFAULT_DELAY) }
+    var timeUnit by remember { mutableStateOf(TimeUnit.Millisecond(delayCount.toInt())) }
 
     if (isDelayEvent) {
         IconButton(Res.drawable.edit_outline) {
@@ -309,6 +312,40 @@ fun ItemInteractions(
                     component = DefaultCounterComponent(),
                     modifier = Modifier.weight(1f)
                 ) { count -> delayCount = count }
+                Row(
+                    modifier = Modifier
+                        .width(100.dp)
+                        .height(42.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable { isShowDropMenu = !isShowDropMenu }
+                        .background(
+                            color = Colors.onAccentColor
+                        ),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Spacer(Modifier.width(16.dp))
+                    Text(
+                        text = timeUnit.getName(),
+                        color = Colors.textColor,
+                        fontSize = 14.sp,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Icon(
+                        painter = painterResource(Res.drawable.arrow_down),
+                        contentDescription = null,
+                        modifier = Modifier.size(10.dp),
+                        tint = Colors.textColor
+                    )
+                    if (isShowDropMenu) {
+                        DropTimeUnitMenu(
+                            delay = delayCount.toInt(),
+                            callback = { item -> println(item) },
+                            dismissed = { isShowDropMenu = false }
+                        )
+                    }
+                    Spacer(Modifier.width(16.dp))
+                }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 Spacer(Modifier.weight(1f))
@@ -325,6 +362,42 @@ fun ItemInteractions(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun DropTimeUnitMenu(delay: Int, callback: (TimeUnit) -> Unit, dismissed: () -> Unit) {
+    var dropDownExpand by remember { mutableStateOf(true) }
+    DropdownMenu(
+        expanded = dropDownExpand,
+        onDismissRequest = {
+            dropDownExpand = false
+            dismissed()
+        },
+        modifier = Modifier
+            .background(
+                color = Colors.background
+            )
+    ) {
+        TimeUnitMenuItem(TimeUnit.Millisecond(delay), callback) { dropDownExpand = false }
+        TimeUnitMenuItem(TimeUnit.Seconds(delay), callback) { dropDownExpand = false }
+        TimeUnitMenuItem(TimeUnit.Minutes(delay), callback) { dropDownExpand = false }
+    }
+}
+
+@Composable
+private fun TimeUnitMenuItem(item: TimeUnit, callback: (TimeUnit) -> Unit, dismissed: () -> Unit) {
+    DropdownMenuItem(
+        onClick = {
+            callback(item)
+            dismissed()
+        }
+    ) {
+        Text(
+            text = item.getName(),
+            color = Colors.textColor,
+            fontSize = 12.sp
+        )
     }
 }
 
