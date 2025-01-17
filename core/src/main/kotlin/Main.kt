@@ -2,12 +2,11 @@ import com.github.kwhat.jnativehook.GlobalScreen
 import kotlinx.coroutines.delay
 import listeners.KeyListener
 import listeners.MouseListener
-import macro.*
-import notification.sendNotification
+import macro.seEssenceMPRegen
 import java.awt.Robot
 
 suspend fun main() {
-    val myMacros = listOf(sumF1toF3, sumF1toF4, sumF1toF6AOE)
+    val myMacros = listOf(seEssenceMPRegen)
     macroStart(myMacros)
 }
 
@@ -47,7 +46,6 @@ suspend fun macroStart(macros: List<Macro>) {
         }
     } finally {
         GlobalScreen.unregisterNativeHook()
-        sendNotification("Программа остановлена")
     }
 }
 

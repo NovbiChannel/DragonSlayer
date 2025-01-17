@@ -16,6 +16,7 @@ interface RootComponent {
     fun onProfileTabClicked()
     fun onBackClicked()
     fun onBackClicked(toIndex: Int)
+    fun onMacroStartStop(isLaunched: Boolean)
 
     sealed class Child {
         class MacroChild(val component: MacrosComponent): Child()

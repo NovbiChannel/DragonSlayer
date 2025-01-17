@@ -38,7 +38,8 @@ fun RootContent(component: RootComponent) {
             onMacroClick = { component.onMacrosTabClicked() },
             onEditorClick = { component.onEditorTabClicked() },
             onSettingsClick = { component.onSettingsTabClicked() },
-            onProfileClick = { component.onProfileTabClicked() }
+            onProfileClick = { component.onProfileTabClicked() },
+            onMacroStartStop = { isLaunched -> component.onMacroStartStop(isLaunched) }
         )
         Spacer(Modifier.width(16.dp))
         ContentView(Modifier.weight(3f)) { modifier ->
