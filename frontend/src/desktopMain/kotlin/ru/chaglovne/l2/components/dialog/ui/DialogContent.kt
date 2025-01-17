@@ -28,7 +28,6 @@ fun DialogUI(
         Box(
             modifier = Modifier
                 .widthIn(min = 200.dp)
-                .padding(16.dp)
                 .background(
                     color = Colors.primaryContainer,
                     shape = RoundedCornerShape(16.dp)
@@ -37,7 +36,7 @@ fun DialogUI(
             contentAlignment = Alignment.TopCenter
         ) {
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Row {

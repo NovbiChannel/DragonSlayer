@@ -1,5 +1,6 @@
 package ru.chaglovne.l2.components.editor.ui
 
+import DEFAULT_DELAY
 import LoopType
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -31,9 +32,12 @@ import l2macros.frontend.generated.resources.foundation_arrow_right
 import l2macros.frontend.generated.resources.repeat
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import ru.chaglovne.l2.components.counters.ui.CounterUI
+import ru.chaglovne.l2.components.counters.ui_logic.DefaultCounterComponent
 import ru.chaglovne.l2.components.dialog.ui.DialogUI
 import ru.chaglovne.l2.components.dialog.ui_logic.DefaultDialogComponent
 import ru.chaglovne.l2.components.editor.ui_logic.EditorComponent
+import ru.chaglovne.l2.compose_ui.AccentButton
 import ru.chaglovne.l2.compose_ui.InformingDashboard
 import ru.chaglovne.l2.compose_ui.Keyboard
 import ru.chaglovne.l2.compose_ui.Mouse
@@ -279,6 +283,8 @@ fun ItemInteractions(
     outputHandler: (EditorComponent.Output) -> Unit
 ) {
     var isShowDialog by remember { mutableStateOf(false) }
+    var delayCount by remember { mutableStateOf(DEFAULT_DELAY) }
+
     if (isDelayEvent) {
         IconButton(Res.drawable.edit_outline) {
             isShowDialog = true
@@ -298,7 +304,26 @@ fun ItemInteractions(
         DialogUI(
             DefaultDialogComponent(title = "Изменить время ожидания", onDismissed = { isShowDialog = false })
         ) {
-
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                CounterUI(
+                    component = DefaultCounterComponent(),
+                    modifier = Modifier.weight(1f)
+                ) { count -> delayCount = count }
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                Spacer(Modifier.weight(1f))
+                AccentButton(
+                    title = "Отменить",
+                    isSelected = false
+                ) { isShowDialog = false }
+                AccentButton(
+                    title = "Сохранить",
+                    isSelected = true
+                ) {
+                    isShowDialog = false
+                    outputHandler(EditorComponent.Output.SetDelay(eventId, delayCount))
+                }
+            }
         }
     }
 }

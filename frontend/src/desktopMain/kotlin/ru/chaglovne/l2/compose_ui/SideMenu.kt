@@ -63,19 +63,35 @@ fun SideMenu(
                 fontSize = 24.sp
             )
             Spacer(Modifier.height(35.dp))
-            AccentButton("Macros", selectedTab == macroKey) {
+            AccentButton(
+                title = "Macros",
+                isSelected = selectedTab == macroKey,
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 selectedTab = macroKey
                 onMacroClick()
             }
-            AccentButton("Editor", selectedTab == editorKey) {
+            AccentButton(
+                title = "Editor",
+                isSelected = selectedTab == editorKey,
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 selectedTab = editorKey
                 onEditorClick()
             }
-            AccentButton("Settings", selectedTab == settingsKey) {
+            AccentButton(
+                title = "Settings",
+                isSelected = selectedTab == settingsKey,
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 selectedTab = settingsKey
                 onSettingsClick()
             }
-            AccentButton("Profile", selectedTab == profileKey) {
+            AccentButton(
+                title = "Profile",
+                isSelected = selectedTab == profileKey,
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 selectedTab = profileKey
                 onProfileClick()
             }

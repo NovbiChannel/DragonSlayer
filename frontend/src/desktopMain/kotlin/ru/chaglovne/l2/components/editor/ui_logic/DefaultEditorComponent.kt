@@ -28,21 +28,11 @@ class DefaultEditorComponent(
 
     override fun outputHandler(output: EditorComponent.Output) {
         when (output) {
-            is EditorComponent.Output.Delete -> {
-                onDeleteEvent(output.eventId)
-            }
-            is EditorComponent.Output.MoveDown -> {
-                onMoveEventDown(output.eventId)
-            }
-            is EditorComponent.Output.MoveUp -> {
-                onMoveEventUp(output.eventId)
-            }
-            is EditorComponent.Output.Select -> {
-                onEventSelect(output.eventId)
-            }
-            is EditorComponent.Output.SetDelay -> {
-
-            }
+            is EditorComponent.Output.Delete -> { onDeleteEvent(output.eventId) }
+            is EditorComponent.Output.MoveDown -> { onMoveEventDown(output.eventId) }
+            is EditorComponent.Output.MoveUp -> { onMoveEventUp(output.eventId) }
+            is EditorComponent.Output.Select -> { onEventSelect(output.eventId) }
+            is EditorComponent.Output.SetDelay -> { onDelayChange(eventId = output.eventId, delay = output.delay) }
         }
     }
 
