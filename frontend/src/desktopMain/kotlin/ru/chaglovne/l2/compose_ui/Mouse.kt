@@ -13,7 +13,7 @@ import java.awt.event.MouseEvent
 @Composable
 fun Mouse(callback: (keyCode: Int) -> Unit) {
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.height(170.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Row(
@@ -35,7 +35,7 @@ fun Mouse(callback: (keyCode: Int) -> Unit) {
             }
             Box(
                 modifier = Modifier
-                    .weight(1f)
+                    .fillMaxSize()
                     .background(
                         color = Colors.secondaryContainer,
                         shape = RoundedCornerShape(8.dp)

@@ -24,7 +24,8 @@ fun SideMenu(
     onMacroClick: () -> Unit,
     onEditorClick: () -> Unit,
     onSettingsClick: () -> Unit,
-    onProfileClick: () -> Unit
+    onProfileClick: () -> Unit,
+    onMacroStartStop: (isLaunched: Boolean) -> Unit
 ) {
     val macroKey = "MACRO"
     val editorKey = "EDITOR"
@@ -81,6 +82,7 @@ fun SideMenu(
             Spacer(Modifier.weight(1F))
             PlayStopButton(isActive) {
                 isActive = !isActive
+                onMacroStartStop(isActive)
                 val message = if (isActive) "Программа запущена" else "Программа остановлена"
                 scope.launch { snackbarHostState.showSnackbar(message) }
             }

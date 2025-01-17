@@ -3,7 +3,12 @@ package ru.chaglovne.l2.components.root.ui_logic
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.*
 import com.arkivanov.decompose.value.Value
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
+import macro.seEssenceMPRegen
+import macroStart
 import ru.chaglovne.l2.components.editor.ui_logic.DefaultEditorComponent
 import ru.chaglovne.l2.components.macros.ui_logic.DefaultMacrosComponent
 import ru.chaglovne.l2.components.profile.ui_logic.DefaultProfileComponent
@@ -12,6 +17,7 @@ import ru.chaglovne.l2.components.settings.ui_logic.DefaultSettingsComponent
 class DefaultRootComponent(
     componentContext: ComponentContext
 ): RootComponent, ComponentContext by componentContext {
+    private var macroJob: Job? = null
     private val navigation = StackNavigation<Config>()
     private val _stack = childStack(
         source = navigation,
@@ -43,6 +49,15 @@ class DefaultRootComponent(
 
     override fun onBackClicked(toIndex: Int) {
         navigation.popTo(index = toIndex)
+    }
+
+    override fun onMacroStartStop(isLaunched: Boolean) {
+        if (isLaunched) {
+            macroJob = GlobalScope.launch { macroStart(macros = listOf(seEssenceMPRegen)) }
+        } else {
+            macroJob?.cancel()
+            macroJob = null
+        }
     }
 
     private fun child(config: Config, componentContext: ComponentContext): RootComponent.Child =

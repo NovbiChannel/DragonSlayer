@@ -7,7 +7,21 @@ import Macro
 import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent
 import com.github.kwhat.jnativehook.mouse.NativeMouseEvent
 import min
+import sec
 import java.awt.event.KeyEvent
+
+val seEssenceMPRegen = Macro(
+    title = "ШЕ Essence МП реген 90c",
+    description = "МП реген раз в 90c",
+    comment = "f1 - тычка, f2 - подобрать, f3 - МП реген",
+    inputType = InputType.MOUSE(NativeMouseEvent.BUTTON4),
+    loopType = LoopType.INFINITE,
+    keys = listOf(
+        EventConfig(KeyEvent.VK_F1),
+        EventConfig(KeyEvent.VK_F2),
+        EventConfig(KeyEvent.VK_F3, interval = 20.sec)
+    )
+)
 
 val sumF1toF3 = Macro(
     title = "Соло таргет без баланса",
