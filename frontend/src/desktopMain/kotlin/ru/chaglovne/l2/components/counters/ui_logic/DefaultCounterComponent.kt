@@ -5,10 +5,10 @@ import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.update
 
-class DefaultCounterComponent(): CounterComponent {
+class DefaultCounterComponent(val count: Int = DEFAULT_DELAY.toInt()): CounterComponent {
     private val _model =
         MutableValue(
-            CounterComponent.Model(DEFAULT_DELAY.toInt())
+            CounterComponent.Model(count)
         )
     override val model: Value<CounterComponent.Model> = _model
 

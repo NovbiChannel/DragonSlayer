@@ -1,11 +1,9 @@
 package ru.chaglovne.l2.components.editor.ui
 
-import DEFAULT_DELAY
 import LoopType
 import TimeUnit
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,19 +16,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.focus.onFocusEvent
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import l2macros.frontend.generated.resources.*
-import l2macros.frontend.generated.resources.Res
-import l2macros.frontend.generated.resources.access_time
-import l2macros.frontend.generated.resources.foundation_arrow_right
-import l2macros.frontend.generated.resources.repeat
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import ru.chaglovne.l2.components.counters.ui.CounterUI
@@ -63,7 +52,8 @@ fun EditorContent(component: EditorComponent) {
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Keyboard { keyCode ->
-                component.onAddEvent(EditorComponent.EventType.KeyboardClick(keyCode))
+                component.onAddEvent(EditorComponent.EventType.KeyPress(keyCode))
+                component.onAddEvent(EditorComponent.EventType.KeyRelease(keyCode))
             }
             Column(
                 modifier = Modifier.wrapContentHeight(),
@@ -85,7 +75,7 @@ fun EditorContent(component: EditorComponent) {
                     ) {
                         Image(
                             painter = painterResource(Res.drawable.access_time),
-                            contentDescription = "add delay"
+                            contentDescription = null
                         )
                     }
                     Button(
@@ -161,7 +151,8 @@ fun EditorContent(component: EditorComponent) {
                     }
                 }
                 Mouse { keyCode ->
-                    component.onAddEvent(EditorComponent.EventType.MouseClick(keyCode))
+                    component.onAddEvent(EditorComponent.EventType.MousePress(keyCode))
+                    component.onAddEvent(EditorComponent.EventType.MouseRelease(keyCode))
                 }
             }
         }
@@ -224,13 +215,13 @@ fun EventList(
 
 @Composable
 fun EventItem(
-    item: EditorComponent.Event,
+    event: EditorComponent.Event,
     outputHandler: (EditorComponent.Output) -> Unit,
     selectedItemId: Int
 ) {
-
-    val isSelected = item.id == selectedItemId
+    val isSelected = event.id == selectedItemId
     val bgColor = if (isSelected) Colors.accentColor else Colors.onAccentColor
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -239,7 +230,7 @@ fun EventItem(
                 color = bgColor,
                 shape = RoundedCornerShape(8.dp)
             )
-            .clickable { outputHandler(EditorComponent.Output.Select(item.id)) },
+            .clickable { outputHandler(EditorComponent.Output.Select(event.id)) },
         contentAlignment = Alignment.Center
     ) {
         Row(
@@ -247,11 +238,12 @@ fun EventItem(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            val resource = when(item.eventType) {
+            val resource = when(event.eventType) {
                 is EditorComponent.EventType.Delay -> Res.drawable.access_time
-                is EditorComponent.EventType.KeyboardClick -> Res.drawable.enter_key
-                is EditorComponent.EventType.MouseClick -> Res.drawable.solar_mouse_linear
+                is EditorComponent.EventType.KeyPress, is EditorComponent.EventType.KeyRelease -> Res.drawable.enter_key
+                is EditorComponent.EventType.MousePress, is EditorComponent.EventType.MouseRelease -> Res.drawable.solar_mouse_linear
             }
+
             Image(
                 modifier = Modifier.size(18.dp),
                 painter = painterResource(resource),
@@ -259,17 +251,17 @@ fun EventItem(
             )
             Spacer(Modifier.width(4.dp))
             Text(
-                text = item.title,
+                text = event.title,
                 color = Colors.textColor,
                 fontSize = 14.sp
             )
 
             Spacer(Modifier.weight(1f))
 
-            if (item.id == selectedItemId) {
+            if (event.id == selectedItemId) {
                 ItemInteractions(
-                    eventId = item.id,
-                    isDelayEvent = item.eventType is EditorComponent.EventType.Delay,
+                    event = event,
+                    isDelayEvent = event.eventType is EditorComponent.EventType.Delay,
                     outputHandler = outputHandler
                 )
             }
@@ -279,14 +271,11 @@ fun EventItem(
 
 @Composable
 fun ItemInteractions(
-    eventId: Int,
+    event: EditorComponent.Event,
     isDelayEvent: Boolean,
     outputHandler: (EditorComponent.Output) -> Unit
 ) {
     var isShowDialog by remember { mutableStateOf(false) }
-    var isShowDropMenu by remember { mutableStateOf(false) }
-    var delayCount by remember { mutableStateOf(DEFAULT_DELAY) }
-    var timeUnit by remember { mutableStateOf(TimeUnit.Millisecond(delayCount.toInt())) }
 
     if (isDelayEvent) {
         IconButton(Res.drawable.edit_outline) {
@@ -294,72 +283,82 @@ fun ItemInteractions(
         }
     }
     IconButton(Res.drawable.arrow_up) {
-        outputHandler(EditorComponent.Output.MoveUp(eventId))
+        outputHandler(EditorComponent.Output.MoveUp(event.id))
     }
     IconButton(Res.drawable.arrow_down) {
-        outputHandler(EditorComponent.Output.MoveDown(eventId))
+        outputHandler(EditorComponent.Output.MoveDown(event.id))
     }
     IconButton(Res.drawable.mdi_delete_outline) {
-        outputHandler(EditorComponent.Output.Delete(eventId))
+        outputHandler(EditorComponent.Output.Delete(event.id))
     }
 
-    if (isShowDialog) {
-        DialogUI(
-            DefaultDialogComponent(title = "Изменить время ожидания", onDismissed = { isShowDialog = false })
-        ) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                CounterUI(
-                    component = DefaultCounterComponent(),
-                    modifier = Modifier.weight(1f)
-                ) { count -> delayCount = count }
-                Row(
-                    modifier = Modifier
-                        .width(100.dp)
-                        .height(42.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .clickable { isShowDropMenu = !isShowDropMenu }
-                        .background(
-                            color = Colors.onAccentColor
-                        ),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Spacer(Modifier.width(16.dp))
-                    Text(
-                        text = timeUnit.getName(),
-                        color = Colors.textColor,
-                        fontSize = 14.sp,
-                        modifier = Modifier.weight(1f)
-                    )
-                    Icon(
-                        painter = painterResource(Res.drawable.arrow_down),
-                        contentDescription = null,
-                        modifier = Modifier.size(10.dp),
-                        tint = Colors.textColor
-                    )
-                    if (isShowDropMenu) {
-                        DropTimeUnitMenu(
-                            delay = delayCount.toInt(),
-                            callback = { item -> println(item) },
-                            dismissed = { isShowDropMenu = false }
-                        )
-                    }
-                    Spacer(Modifier.width(16.dp))
-                }
+    if (isDelayEvent && isShowDialog) {
+        DelayEditorDialog(event, outputHandler) { isShowDialog = false }
+    }
+}
+
+@Composable
+private fun DelayEditorDialog(event: EditorComponent.Event, outputHandler: (EditorComponent.Output) -> Unit, onDismissed: () -> Unit) {
+    var isShowDropMenu by remember { mutableStateOf(false) }
+    val type = event.eventType as EditorComponent.EventType.Delay
+    var timeUnit by remember { mutableStateOf(type.timeUnit) }
+
+    DialogUI(
+        DefaultDialogComponent(title = "Изменить время ожидания", onDismissed = onDismissed)
+    ) {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            CounterUI(
+                component = DefaultCounterComponent(timeUnit.value),
+                modifier = Modifier.weight(1f)
+            ) { count -> timeUnit.value = count
+                println(timeUnit.value)
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                Spacer(Modifier.weight(1f))
-                AccentButton(
-                    title = "Отменить",
-                    isSelected = false
-                ) { isShowDialog = false }
-                AccentButton(
-                    title = "Сохранить",
-                    isSelected = true
-                ) {
-                    isShowDialog = false
-                    outputHandler(EditorComponent.Output.SetDelay(eventId, delayCount))
+            Row(
+                modifier = Modifier
+                    .width(100.dp)
+                    .height(42.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable { isShowDropMenu = !isShowDropMenu }
+                    .background(Colors.onAccentColor),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Spacer(Modifier.width(16.dp))
+                Text(
+                    text = timeUnit.getName(),
+                    color = Colors.textColor,
+                    fontSize = 14.sp,
+                    modifier = Modifier.weight(1f)
+                )
+                Icon(
+                    painter = painterResource(Res.drawable.arrow_down),
+                    contentDescription = null,
+                    modifier = Modifier.size(10.dp),
+                    tint = Colors.textColor
+                )
+                if (isShowDropMenu) {
+                    DropTimeUnitMenu(
+                        delay = timeUnit.value,
+                        callback = { selectedTimeUnit -> timeUnit = selectedTimeUnit},
+                        dismissed = { isShowDropMenu = false }
+                    )
                 }
+                Spacer(Modifier.width(16.dp))
+            }
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            Spacer(Modifier.weight(1f))
+            AccentButton(
+                title = "Отменить",
+                isSelected = false,
+                onClick = onDismissed
+            )
+            AccentButton(
+                title = "Сохранить",
+                isSelected = true
+            ) {
+                onDismissed()
+                outputHandler(EditorComponent.Output.SetDelay(event.id, timeUnit))
             }
         }
     }
@@ -379,9 +378,8 @@ private fun DropTimeUnitMenu(delay: Int, callback: (TimeUnit) -> Unit, dismissed
                 color = Colors.background
             )
     ) {
-        TimeUnitMenuItem(TimeUnit.Millisecond(delay), callback) { dropDownExpand = false }
-        TimeUnitMenuItem(TimeUnit.Seconds(delay), callback) { dropDownExpand = false }
-        TimeUnitMenuItem(TimeUnit.Minutes(delay), callback) { dropDownExpand = false }
+        val timeUnits = listOf(TimeUnit.Millisecond(delay), TimeUnit.Seconds(delay), TimeUnit.Minutes(delay))
+        timeUnits.forEach { TimeUnitMenuItem(it, callback) { dropDownExpand = false } }
     }
 }
 

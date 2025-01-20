@@ -5,9 +5,13 @@ val Int.min: Long
     get() = this * 60_000L
 
 sealed class TimeUnit {
-    data class Millisecond(val value: Int): TimeUnit()
-    data class Seconds(val value: Int): TimeUnit()
-    data class Minutes(val value: Int): TimeUnit()
+    companion object {
+        const val DEFAULT_VALUE = 34
+    }
+    open var value: Int = DEFAULT_VALUE
+    data class Millisecond(override var value: Int): TimeUnit()
+    data class Seconds(override var value: Int): TimeUnit()
+    data class Minutes(override var value: Int): TimeUnit()
 
     fun delay(): Long {
         return when (val timeUnit = this) {

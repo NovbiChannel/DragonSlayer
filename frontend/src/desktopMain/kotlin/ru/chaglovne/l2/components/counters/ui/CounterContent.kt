@@ -24,7 +24,7 @@ import ru.chaglovne.l2.components.counters.ui_logic.CounterComponent
 import ru.chaglovne.l2.theme.Colors
 
 @Composable
-fun CounterUI(component: CounterComponent, modifier: Modifier, output: (Long) -> Unit ) {
+fun CounterUI(component: CounterComponent, modifier: Modifier, output: (Int) -> Unit ) {
     val model by component.model.subscribeAsState()
     Row(
         modifier = modifier
@@ -45,11 +45,11 @@ fun CounterUI(component: CounterComponent, modifier: Modifier, output: (Long) ->
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
             CountButton(Res.drawable.arrow_up) {
                 component.increment()
-                output(model.count.toLong())
+                output(model.count)
             }
             CountButton(Res.drawable.arrow_down) {
                 component.decrement()
-                output(model.count.toLong())
+                output(model.count)
             }
         }
     }

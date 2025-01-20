@@ -19,7 +19,8 @@ val seEssenceMPRegen = Macro(
     keys = listOf(
         EventConfig(KeyEvent.VK_F1),
         EventConfig(KeyEvent.VK_F2),
-        EventConfig(KeyEvent.VK_F3, interval = 20.sec)
+        EventConfig(KeyEvent.VK_F3, interval = 3.min),
+        //EventConfig(KeyEvent.VK_F4, interval = 5.min)
     )
 )
 
