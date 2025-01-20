@@ -1,5 +1,5 @@
 plugins {
-    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.kotlinx.serialization)
 }
 
@@ -7,6 +7,12 @@ repositories {
     mavenCentral()
 }
 
-dependencies {
-    implementation(libs.ktor.serialization.kotlinx.json)
+kotlin {
+    js()
+    jvm("desktop")
+    sourceSets {
+        commonMain.dependencies {
+            implementation(libs.ktor.serialization.kotlinx.json)
+        }
+    }
 }

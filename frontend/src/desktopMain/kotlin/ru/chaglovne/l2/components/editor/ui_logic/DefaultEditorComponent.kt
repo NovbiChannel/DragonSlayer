@@ -2,6 +2,7 @@ package ru.chaglovne.l2.components.editor.ui_logic
 
 import DEFAULT_DELAY
 import LoopType
+import TimeUnit
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
@@ -28,69 +29,65 @@ class DefaultEditorComponent(
 
     override fun outputHandler(output: EditorComponent.Output) {
         when (output) {
-            is EditorComponent.Output.Delete -> {
-                onDeleteEvent(output.eventId)
-            }
-            is EditorComponent.Output.MoveDown -> {
-                onMoveEventDown(output.eventId)
-            }
-            is EditorComponent.Output.MoveUp -> {
-                onMoveEventUp(output.eventId)
-            }
-            is EditorComponent.Output.Select -> {
-                onEventSelect(output.eventId)
-            }
-            is EditorComponent.Output.SetDelay -> {
-
-            }
+            is EditorComponent.Output.Delete -> { onDeleteEvent(output.eventId) }
+            is EditorComponent.Output.MoveDown -> { onMoveEventDown(output.eventId) }
+            is EditorComponent.Output.MoveUp -> { onMoveEventUp(output.eventId) }
+            is EditorComponent.Output.Select -> { onEventSelect(output.eventId) }
+            is EditorComponent.Output.SetDelay -> { onDelayChange(eventId = output.eventId, timeUnit = output.timeUnit) }
+            is EditorComponent.Output.SetInterval -> { onIntervalChange(eventId = output.eventId, timeUnit = output.timeUnit) }
         }
     }
 
     override fun onAddEvent(type: EditorComponent.EventType) {
+        val defaultDelayTitle = "Задержка $DEFAULT_DELAY" + TimeUnit.Millisecond(DEFAULT_DELAY.toInt()).getName()
+
+        fun createDelayEvent(id: Int) = EditorComponent.Event(
+            id = id,
+            eventType = EditorComponent.EventType.Delay(),
+            title = defaultDelayTitle
+        )
+
+        fun createEvent(id: Int, eventType: EditorComponent.EventType, title: String) = EditorComponent.Event(
+            id = id,
+            eventType = eventType,
+            title = title
+        )
+
         _model.update {
             val id = it.events.lastIndex + 1
             val events = when (type) {
                 is EditorComponent.EventType.Delay -> listOf(
-                    EditorComponent.Event(
-                        id = id,
-                        eventType = type,
-                        title = "Задержка ${type.delay}" + "мс"
-                    )
+                    createEvent(id, type, "Задержка ${type.timeUnit.delay()}" + type.timeUnit.getName())
                 )
-                is EditorComponent.EventType.KeyboardClick -> listOf(
-                    EditorComponent.Event(
-                        id = id,
-                        eventType = type,
-                        title = "Нажать клавишу ${KeyEvent.getKeyText(type.key)}"
-                    ),
-                    EditorComponent.Event(
-                        id = id + 1,
-                        eventType = EditorComponent.EventType.Delay(),
-                        title = "Задержка $DEFAULT_DELAY" + "мс"
-                    )
+                is EditorComponent.EventType.KeyPress -> listOf(
+                    createEvent(id, type, "Нажать клавишу ${KeyEvent.getKeyText(type.key)}"),
+                    createDelayEvent(id + 1)
                 )
-                is EditorComponent.EventType.MouseClick -> listOf(
-                    EditorComponent.Event(
-                        id = id,
-                        eventType = type,
-                        title = "Нажать кнопку мыши ${MouseEvent.getMouseModifiersText(type.key)}"
-                    ),
-                    EditorComponent.Event(
-                        id = id + 1,
-                        eventType = EditorComponent.EventType.Delay(),
-                        title = "Задержка $DEFAULT_DELAY" + "мс"
-                    )
+                is EditorComponent.EventType.KeyRelease -> listOf(
+                    createEvent(id, type, "Отпустить клавишу ${KeyEvent.getKeyText(type.key)}"),
+                    createDelayEvent(id + 1)
+                )
+                is EditorComponent.EventType.MousePress -> listOf(
+                    createEvent(id, type, "Нажать кнопку мыши ${MouseEvent.getMouseModifiersText(type.key)}"),
+                    createDelayEvent(id + 1)
+                )
+                is EditorComponent.EventType.MouseRelease -> listOf(
+                    createEvent(id, type, "Отпустить кнопку мыши ${MouseEvent.getMouseModifiersText(type.key)}"),
+                    createDelayEvent(id + 1)
                 )
             }
             val updatedEvents =
                 it.events + events
-            it.copy(events = updatedEvents)
+            it.copy(
+                events = updatedEvents,
+                selectedEventId = updatedEvents.last().id
+            )
         }
     }
 
     private fun onDeleteEvent(eventId: Int) {
         val event = _model.value.events.find { it.id == eventId }
-        event?.let { event ->
+        event?.let {
             _model.update {
                 val newList = it.events.toMutableList()
                 newList.remove(event)
@@ -130,31 +127,55 @@ class DefaultEditorComponent(
     }
 
     private fun onEventSelect(eventId: Int) {
-        _model.update { model ->
-            model.copy(selectedEventId = eventId)
-        }
+        _model.update { it.copy(selectedEventId = eventId) }
     }
 
-    private fun onDelayChange(eventId: Int, delay: Long) {
+    private fun onDelayChange(eventId: Int, timeUnit: TimeUnit) {
         val event = _model.value.events.find { it.id == eventId }
-        event?.let { event ->
-            when (val type = event.eventType) {
+        event?.let { existingEvent  ->
+            when (val type = existingEvent.eventType) {
                 is EditorComponent.EventType.Delay -> {
-                    val updatedType = type.copy(delay = delay)
-
-                    _model.update {
-                        val updatedEvents = _model.value.events.map { existingEvents ->
-                            if (existingEvents.id == eventId) {
-                                existingEvents.copy(eventType = updatedType)
-                            } else {
-                                existingEvents
-                            }
-                        }
-                        it.copy(events = updatedEvents)
+                    val updatedType = type.copy(timeUnit = timeUnit)
+                    updateEvent(eventId) { event ->
+                        event.copy(
+                            eventType = updatedType,
+                            title = "Задержка ${timeUnit.value}" + timeUnit.getName()
+                        )
                     }
                 }
                 else -> return
             }
+        }
+    }
+
+    private fun onIntervalChange(eventId: Int, timeUnit: TimeUnit) {
+        val event = _model.value.events.find { it.id == eventId }
+        event?.let { existingEvent ->
+            when (val type = existingEvent.eventType) {
+                is EditorComponent.EventType.KeyPress -> {
+                    val updatedType = type.copy(timeUnit = timeUnit)
+                    updateEvent(eventId) { event ->
+                        event.copy(
+                            eventType = updatedType,
+                            title = event.title + ", Интервал нажатия ${timeUnit.delay()}" + timeUnit.getName()
+                        )
+                    }
+                }
+                else -> return
+            }
+        }
+    }
+
+    private fun updateEvent(eventId: Int, update: (EditorComponent.Event) -> EditorComponent.Event) {
+        _model.update { model ->
+            val updatedEvents = model.events.map { existingEvent ->
+                if (existingEvent.id == eventId) {
+                    update(existingEvent)
+                } else {
+                    existingEvent
+                }
+            }
+            model.copy(events = updatedEvents)
         }
     }
 }

@@ -1,6 +1,5 @@
 package ru.chaglovne.l2.compose_ui
 
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
@@ -14,11 +13,11 @@ import androidx.compose.ui.unit.sp
 import ru.chaglovne.l2.theme.Colors
 
 @Composable
-fun AccentButton(title: String, isSelected: Boolean, onClick: () -> Unit) {
+fun AccentButton(title: String, isSelected: Boolean, modifier: Modifier = Modifier, onClick: () -> Unit) {
     val backgroundColor = if (isSelected) Colors.accentColor else Colors.onAccentColor
     Button(
         onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier,
         colors = ButtonDefaults.buttonColors(
             backgroundColor = backgroundColor,
             contentColor = Colors.textColor
