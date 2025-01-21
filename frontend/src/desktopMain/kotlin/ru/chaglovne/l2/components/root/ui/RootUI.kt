@@ -56,7 +56,7 @@ fun RootContent(component: RootComponent) {
                         shape = RoundedCornerShape(10.dp)
                     )) {
                     when (val child = stack.active.instance) {
-                        is RootComponent.Child.EditorChild -> EditorContent(child.component)
+                        is RootComponent.Child.EditorChild -> EditorContent(child.component, snackbarHostState)
                         is RootComponent.Child.MacroChild -> MacrosContent(child.component)
                         is RootComponent.Child.SettingsChild -> SettingsContent(child.component)
                         is RootComponent.Child.ProfileChild -> ProfileContent(child.component)

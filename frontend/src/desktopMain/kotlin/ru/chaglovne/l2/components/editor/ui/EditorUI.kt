@@ -16,9 +16,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
+import kotlinx.coroutines.launch
 import l2macros.frontend.generated.resources.*
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
@@ -27,6 +29,8 @@ import ru.chaglovne.l2.components.counters.ui_logic.DefaultCounterComponent
 import ru.chaglovne.l2.components.dialog.ui.DialogUI
 import ru.chaglovne.l2.components.dialog.ui_logic.DefaultDialogComponent
 import ru.chaglovne.l2.components.editor.ui_logic.EditorComponent
+import ru.chaglovne.l2.components.input.ui.TextInputUI
+import ru.chaglovne.l2.components.input.ui_logic.DefaultTextInputComponent
 import ru.chaglovne.l2.compose_ui.AccentButton
 import ru.chaglovne.l2.compose_ui.InformingDashboard
 import ru.chaglovne.l2.compose_ui.Keyboard
@@ -34,9 +38,11 @@ import ru.chaglovne.l2.compose_ui.Mouse
 import ru.chaglovne.l2.theme.Colors
 
 @Composable
-fun EditorContent(component: EditorComponent) {
+fun EditorContent(component: EditorComponent, snackbarHostState: SnackbarHostState) {
+    val scope = rememberCoroutineScope()
     val model by component.model.subscribeAsState()
     var dropDownExpand by remember { mutableStateOf(false) }
+    var isShowDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier.fillMaxSize().padding(4.dp),
@@ -157,24 +163,39 @@ fun EditorContent(component: EditorComponent) {
             }
         }
         Row(
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Spacer(Modifier.weight(1f))
-            Button(
-                onClick = {},
+            TextInputUI(
+                component = component.textInputComponent,
+                modifier = Modifier.weight(1f).height(36.dp)
+            )
+            AccentButton(
+                title = "Очистить",
+                isSelected = false
+            ) { isShowDialog = true }
+            AccentButton(
+                title = "Сохранить",
+                isSelected = model.events.isNotEmpty()
             ) {
-                Text("test")
+                if (model.title.isBlank()) {
+                    component.textInputComponent.onError()
+                    scope.launch { snackbarHostState.showSnackbar("Введите наименование макроса") }
+                } else {
+                    println(model)
+                }
             }
-            Button(
-                onClick = {},
-            ) {
-                Text("clean")
-            }
-            Button(
-                onClick = {},
-            ) {
-                Text("save")
-            }
+        }
+    }
+
+    if (isShowDialog) {
+        ConfirmationDialog(
+            title = "Подтверждение",
+            message = "Ты действительно хочешь очистить редактор макроса?",
+            onDismissed = { isShowDialog = false }
+        ) {
+            isShowDialog = false
+            component.outputHandler(EditorComponent.Output.Clear)
         }
     }
 }
@@ -259,9 +280,10 @@ fun EventItem(
             Spacer(Modifier.weight(1f))
 
             if (event.id == selectedItemId) {
+                val isReleaseEvent = event.eventType is EditorComponent.EventType.KeyRelease || event.eventType is EditorComponent.EventType.MouseRelease
                 ItemInteractions(
                     event = event,
-                    isDelayEvent = event.eventType is EditorComponent.EventType.Delay,
+                    isReleaseEvent = isReleaseEvent,
                     outputHandler = outputHandler
                 )
             }
@@ -272,45 +294,75 @@ fun EventItem(
 @Composable
 fun ItemInteractions(
     event: EditorComponent.Event,
-    isDelayEvent: Boolean,
+    isReleaseEvent: Boolean,
     outputHandler: (EditorComponent.Output) -> Unit
 ) {
     var isShowDialog by remember { mutableStateOf(false) }
 
-    if (isDelayEvent) {
-        IconButton(Res.drawable.edit_outline) {
-            isShowDialog = true
-        }
-    }
-    IconButton(Res.drawable.arrow_up) {
-        outputHandler(EditorComponent.Output.MoveUp(event.id))
-    }
-    IconButton(Res.drawable.arrow_down) {
-        outputHandler(EditorComponent.Output.MoveDown(event.id))
-    }
-    IconButton(Res.drawable.mdi_delete_outline) {
-        outputHandler(EditorComponent.Output.Delete(event.id))
-    }
+    if (!isReleaseEvent) IconButton(Res.drawable.edit_outline) { isShowDialog = true }
+    IconButton(Res.drawable.arrow_up) { outputHandler(EditorComponent.Output.MoveUp(event.id)) }
+    IconButton(Res.drawable.arrow_down) { outputHandler(EditorComponent.Output.MoveDown(event.id)) }
+    IconButton(Res.drawable.mdi_delete_outline) { outputHandler(EditorComponent.Output.Delete(event.id)) }
 
-    if (isDelayEvent && isShowDialog) {
-        DelayEditorDialog(event, outputHandler) { isShowDialog = false }
+    when (event.eventType) {
+        is EditorComponent.EventType.Delay -> {
+            if (isShowDialog) DelayEditorDialog(event, outputHandler) { isShowDialog = false }
+        }
+        is EditorComponent.EventType.KeyPress, is EditorComponent.EventType.MousePress-> {
+            if (isShowDialog) KeyPressIntervalEditorDialog(event, outputHandler) { isShowDialog = false }
+        }
+        else -> {}
+    }
+}
+
+private fun getInitialTimeUnit(type: EditorComponent.EventType): TimeUnit {
+    return when (type) {
+        is EditorComponent.EventType.KeyPress -> type.timeUnit ?: TimeUnit.Millisecond(0)
+        is EditorComponent.EventType.MousePress -> type.timeUnit ?: TimeUnit.Millisecond(0)
+        is EditorComponent.EventType.Delay -> type.timeUnit
+        else -> TimeUnit.Millisecond(TimeUnit.DEFAULT_VALUE)
     }
 }
 
 @Composable
+private fun KeyPressIntervalEditorDialog(event: EditorComponent.Event, outputHandler: (EditorComponent.Output) -> Unit, onDismissed: () -> Unit) {
+    TimeUnitEditorDialog(
+        title = "Изменить интервал нажатий",
+        event = event,
+        outputHandler = outputHandler,
+        onDismissed = onDismissed
+    )
+}
+
+@Composable
 private fun DelayEditorDialog(event: EditorComponent.Event, outputHandler: (EditorComponent.Output) -> Unit, onDismissed: () -> Unit) {
+    TimeUnitEditorDialog(
+        title = "Изменить время ожидания",
+        event = event,
+        outputHandler = outputHandler,
+        onDismissed = onDismissed
+    )
+}
+
+@Composable
+private fun TimeUnitEditorDialog(
+    title: String,
+    event: EditorComponent.Event,
+    outputHandler: (EditorComponent.Output) -> Unit,
+    onDismissed: () -> Unit
+) {
     var isShowDropMenu by remember { mutableStateOf(false) }
-    val type = event.eventType as EditorComponent.EventType.Delay
-    var timeUnit by remember { mutableStateOf(type.timeUnit) }
+    var timeUnit by remember { mutableStateOf(getInitialTimeUnit(event.eventType)) }
 
     DialogUI(
-        DefaultDialogComponent(title = "Изменить время ожидания", onDismissed = onDismissed)
+        DefaultDialogComponent(title = title, onDismissed = onDismissed)
     ) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             CounterUI(
                 component = DefaultCounterComponent(timeUnit.value),
                 modifier = Modifier.weight(1f)
-            ) { count -> timeUnit.value = count
+            ) { count ->
+                timeUnit.value = count
                 println(timeUnit.value)
             }
             Row(
@@ -339,7 +391,7 @@ private fun DelayEditorDialog(event: EditorComponent.Event, outputHandler: (Edit
                 if (isShowDropMenu) {
                     DropTimeUnitMenu(
                         delay = timeUnit.value,
-                        callback = { selectedTimeUnit -> timeUnit = selectedTimeUnit},
+                        callback = { selectedTimeUnit -> timeUnit = selectedTimeUnit },
                         dismissed = { isShowDropMenu = false }
                     )
                 }
@@ -358,8 +410,43 @@ private fun DelayEditorDialog(event: EditorComponent.Event, outputHandler: (Edit
                 isSelected = true
             ) {
                 onDismissed()
-                outputHandler(EditorComponent.Output.SetDelay(event.id, timeUnit))
+
+                when (event.eventType) {
+                    is EditorComponent.EventType.Delay -> {
+                        outputHandler(EditorComponent.Output.SetDelay(event.id, timeUnit))
+                    }
+                    is EditorComponent.EventType.KeyPress, is EditorComponent.EventType.MousePress -> {
+                        outputHandler(EditorComponent.Output.SetInterval(event.id, timeUnit))
+                    }
+                    else -> {}
+                }
             }
+        }
+    }
+}
+
+@Composable
+private fun ConfirmationDialog(title: String, message: String, onDismissed: () -> Unit, onSuccess: () -> Unit) {
+    DialogUI(
+        DefaultDialogComponent(title = title, onDismissed = onDismissed)
+    ) {
+        Text(
+            text = message,
+            color = Colors.textColor,
+            fontSize = 14.sp
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            Spacer(Modifier.weight(1f))
+            AccentButton(
+                title = "Нет",
+                isSelected = false,
+                onClick = onDismissed
+            )
+            AccentButton(
+                title = "Очистить",
+                isSelected = true,
+                onClick = onSuccess
+            )
         }
     }
 }
