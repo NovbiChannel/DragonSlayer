@@ -17,6 +17,6 @@ class DefaultCounterComponent(count: Int = DEFAULT_DELAY.toInt()): CounterCompon
     }
 
     override fun decrement() {
-        _model.update { it.copy(count = it.count - 1) }
+        _model.update { it.copy(count = if (it.count > 0) it.count - 1 else it.count) }
     }
 }
