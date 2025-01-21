@@ -4,6 +4,7 @@ import DEFAULT_DELAY
 import LoopType
 import TimeUnit
 import com.arkivanov.decompose.value.Value
+import ru.chaglovne.l2.components.input.ui_logic.TextInputComponent
 
 interface EditorComponent {
     val model: Value<Model>
@@ -12,10 +13,13 @@ interface EditorComponent {
     fun onAddEvent(type: EventType)
     fun outputHandler(output: Output)
 
+    val textInputComponent: TextInputComponent
+
     data class Model(
         val loopType: LoopType,
         val events: List<Event>,
-        val selectedEventId: Int
+        val selectedEventId: Int,
+        val title: String
     )
 
     data class Event(
@@ -32,6 +36,7 @@ interface EditorComponent {
     }
 
     sealed class Output {
+        data object Clear : Output()
         data class Delete(val eventId: Int): Output()
         data class MoveUp(val eventId: Int): Output()
         data class MoveDown(val eventId: Int): Output()

@@ -79,14 +79,14 @@ fun SideMenu(
                 selectedTab = editorKey
                 onEditorClick()
             }
-            AccentButton(
-                title = "Settings",
-                isSelected = selectedTab == settingsKey,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                selectedTab = settingsKey
-                onSettingsClick()
-            }
+//            AccentButton(
+//                title = "Settings",
+//                isSelected = selectedTab == settingsKey,
+//                modifier = Modifier.fillMaxWidth()
+//            ) {
+//                selectedTab = settingsKey
+//                onSettingsClick()
+//            }
             AccentButton(
                 title = "Profile",
                 isSelected = selectedTab == profileKey,

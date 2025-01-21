@@ -7,6 +7,8 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.update
+import ru.chaglovne.l2.components.input.ui_logic.DefaultTextInputComponent
+import ru.chaglovne.l2.components.input.ui_logic.TextInputComponent
 import java.awt.event.KeyEvent
 import java.awt.event.MouseEvent
 
@@ -18,7 +20,8 @@ class DefaultEditorComponent(
             EditorComponent.Model(
                 loopType = LoopType.INFINITE,
                 events = emptyList(),
-                selectedEventId = -1
+                selectedEventId = -1,
+                title = ""
             )
         )
     override val model: Value<EditorComponent.Model> = _model
@@ -35,8 +38,14 @@ class DefaultEditorComponent(
             is EditorComponent.Output.Select -> { onEventSelect(output.eventId) }
             is EditorComponent.Output.SetDelay -> { onDelayChange(eventId = output.eventId, timeUnit = output.timeUnit) }
             is EditorComponent.Output.SetInterval -> { onIntervalChange(eventId = output.eventId, timeUnit = output.timeUnit) }
+            EditorComponent.Output.Clear -> { onClear() }
         }
     }
+
+    override val textInputComponent: TextInputComponent =
+        DefaultTextInputComponent(componentContext, "Введите наименование макроса") { inputChange ->
+            _model.update { it.copy(title = inputChange) }
+        }
 
     override fun onAddEvent(type: EditorComponent.EventType) {
         val defaultDelayTitle = "Задержка $DEFAULT_DELAY" + TimeUnit.Millisecond(DEFAULT_DELAY.toInt()).getName()
@@ -155,15 +164,37 @@ class DefaultEditorComponent(
                 is EditorComponent.EventType.KeyPress -> {
                     val updatedType = type.copy(timeUnit = timeUnit)
                     updateEvent(eventId) { event ->
+                        var title = "Нажать клавишу ${KeyEvent.getKeyText(type.key)}"
+                        if (timeUnit.value > 0) {
+                            title = title + ", Интервал нажатия ${timeUnit.value}" + timeUnit.getName()
+                        }
                         event.copy(
                             eventType = updatedType,
-                            title = event.title + ", Интервал нажатия ${timeUnit.delay()}" + timeUnit.getName()
+                            title = title
+                        )
+                    }
+                }
+                is EditorComponent.EventType.MousePress -> {
+                    val updatedType = type.copy(timeUnit = timeUnit)
+                    updateEvent(eventId) { event ->
+                        var title = "Нажать кнопку мыши ${MouseEvent.getMouseModifiersText(type.key)}"
+                        if (timeUnit.value > 0) {
+                            title = title + ", Интервал нажатия ${timeUnit.value}" + timeUnit.getName()
+                        }
+                        event.copy(
+                            eventType = updatedType,
+                            title = title
                         )
                     }
                 }
                 else -> return
             }
         }
+    }
+
+    private fun onClear() {
+        _model.update { it.copy(events = emptyList(), selectedEventId = -1) }
+        textInputComponent.onInputChanged("")
     }
 
     private fun updateEvent(eventId: Int, update: (EditorComponent.Event) -> EditorComponent.Event) {
