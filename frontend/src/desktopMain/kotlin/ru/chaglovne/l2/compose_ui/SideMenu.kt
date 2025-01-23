@@ -15,26 +15,19 @@ import kotlinx.coroutines.launch
 import l2macros.frontend.generated.resources.Res
 import l2macros.frontend.generated.resources.app_logo
 import org.jetbrains.compose.resources.painterResource
+import ru.chaglovne.l2.components.root.ui_logic.RootComponent
 import ru.chaglovne.l2.theme.Colors
 
 @Composable
 fun SideMenu(
     modifier: Modifier = Modifier,
     snackbarHostState: SnackbarHostState,
-    onMacroClick: () -> Unit,
-    onEditorClick: () -> Unit,
-    onSettingsClick: () -> Unit,
-    onProfileClick: () -> Unit,
-    onMacroStartStop: (isLaunched: Boolean) -> Unit
+    outputHandler: (output: RootComponent.Output) -> Unit,
+    model: RootComponent.Model
 ) {
-    val macroKey = "MACRO"
-    val editorKey = "EDITOR"
-    val settingsKey = "SETTINGS"
-    val profileKey = "PROFILE"
-
     val scope = rememberCoroutineScope()
-    var selectedTab by remember { mutableStateOf(macroKey) }
     var isActive by remember { mutableStateOf(false) }
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -64,41 +57,24 @@ fun SideMenu(
             )
             Spacer(Modifier.height(35.dp))
             AccentButton(
-                title = "Macros",
-                isSelected = selectedTab == macroKey,
+                title = "Макросы",
+                isSelected = model.isMacroSelected,
                 modifier = Modifier.fillMaxWidth()
-            ) {
-                selectedTab = macroKey
-                onMacroClick()
-            }
+            ) { outputHandler(RootComponent.Output.MacroClick) }
             AccentButton(
-                title = "Editor",
-                isSelected = selectedTab == editorKey,
+                title = "Редактор",
+                isSelected = model.isEditorSelected,
                 modifier = Modifier.fillMaxWidth()
-            ) {
-                selectedTab = editorKey
-                onEditorClick()
-            }
-//            AccentButton(
-//                title = "Settings",
-//                isSelected = selectedTab == settingsKey,
-//                modifier = Modifier.fillMaxWidth()
-//            ) {
-//                selectedTab = settingsKey
-//                onSettingsClick()
-//            }
+            ) { outputHandler(RootComponent.Output.EditorClick) }
             AccentButton(
-                title = "Profile",
-                isSelected = selectedTab == profileKey,
+                title = "Профиль",
+                isSelected = model.isProfileSelected,
                 modifier = Modifier.fillMaxWidth()
-            ) {
-                selectedTab = profileKey
-                onProfileClick()
-            }
+            ) { outputHandler(RootComponent.Output.ProfileClick) }
             Spacer(Modifier.weight(1F))
             PlayStopButton(isActive) {
                 isActive = !isActive
-                onMacroStartStop(isActive)
+                outputHandler(RootComponent.Output.MacroStartStop(isActive))
                 val message = if (isActive) "Программа запущена" else "Программа остановлена"
                 scope.launch { snackbarHostState.showSnackbar(message) }
             }

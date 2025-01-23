@@ -1,69 +1,104 @@
 import com.github.kwhat.jnativehook.GlobalScreen
-import kotlinx.coroutines.delay
-import listeners.KeyListener
+import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent
+import kotlinx.coroutines.*
+import listeners.KeyboardListener
 import listeners.MouseListener
-import macro.seEssenceMPRegen
+import notification.sendNotification
 import java.awt.Robot
 
-suspend fun main() {
-    val myMacros = listOf(seEssenceMPRegen)
-    macroStart(myMacros)
+fun onInputListener(scope: CoroutineScope, output: (InputType) -> Unit): Job {
+    return scope.launch {
+        addListeners(output)
+
+        while (isActive) {
+            delay(DEFAULT_DELAY)
+        }
+
+        GlobalScreen.unregisterNativeHook()
+    }
 }
 
-suspend fun macroStart(macros: List<Macro>) {
-    val robot = Robot()
-    val lastPressTimes = mutableMapOf<Int, Long>()
-    val runningMacros = mutableMapOf<Macro, Boolean>()
+fun macroStart(macros: List<Macro>, scope: CoroutineScope): Job {
+    println(macros)
+    return scope.launch {
+        val robot = Robot()
+        val lastPressTimes = mutableMapOf<Int, Long>()
+        val runningMacros = mutableMapOf<Macro, Boolean>()
 
-    val keyListeners = macros.map { KeyListener(it, runningMacros) }
-    val mouseListeners = macros.map { MouseListener(it, runningMacros) }
+        val listenerJob: Job = onInputListener(scope) { inputType ->
+            val findMacro = macros.find { it.inputType == inputType }
 
-    GlobalScreen.registerNativeHook()
-    keyListeners.forEach { GlobalScreen.addNativeKeyListener(it) }
-    mouseListeners.forEach { GlobalScreen.addNativeMouseListener(it) }
+            findMacro?.let {
+                val message: String
+                val key = when (inputType) {
+                    is InputType.KEYBOARD -> inputType.value
+                    is InputType.MOUSE -> inputType.value
+                }
+                if (runningMacros[findMacro] == true) {
+                    runningMacros[findMacro] = false
+                    message = "Макрос '${findMacro.title}' остановлен"
+                } else {
+                    macros.forEach { macro -> if (macro != findMacro) runningMacros[macro] = false }
+                    runningMacros[findMacro] = true
+                    message = "Макрос '${findMacro.title}' запущен, для остановки нажми ${NativeKeyEvent.getKeyText(key)}"
+                }
+                sendNotification(message)
+            }
+        }
 
-    try {
-        while (true) {
+        while (isActive) {
             macros.forEach { macro ->
                 if (runningMacros[macro] == true) {
                     when (val loopType = macro.loopType) {
-                        is LoopType.SINGLE -> {
-                            executeMacro(robot, lastPressTimes, macro)
-                        }
+                        is LoopType.SINGLE -> execute(robot, lastPressTimes, macro)
                         is LoopType.INFINITE -> {
                             while (runningMacros[macro] == true) {
-                                executeMacro(robot, lastPressTimes, macro)
+                                execute(robot, lastPressTimes, macro)
                             }
                         }
                         is LoopType.CUSTOM -> {
                             repeat(loopType.repetitions) {
-                                executeMacro(robot, lastPressTimes, macro)
+                                execute(robot, lastPressTimes, macro)
                             }
                         }
                     }
                 }
             }
         }
-    } finally {
-        GlobalScreen.unregisterNativeHook()
+        listenerJob.cancel()
     }
 }
 
-private suspend fun executeMacro(
+private fun addListeners(output: (InputType) -> Unit) {
+    GlobalScreen.registerNativeHook()
+    GlobalScreen.addNativeKeyListener(KeyboardListener(output))
+    GlobalScreen.addNativeMouseListener(MouseListener(output))
+}
+
+private suspend fun execute(
     robot: Robot,
     lastPressTimes: MutableMap<Int, Long>,
-    macros: Macro
+    macro: Macro
 ) {
-    macros.keys.forEach { config ->
-        val lastPressTime = lastPressTimes[config.eventKey] ?: 0L
+    macro.events.forEach { event ->
         val currentTime = System.currentTimeMillis()
 
-        if (currentTime - lastPressTime >= config.interval) {
-            robot.keyPress(config.eventKey)
-            robot.keyRelease(config.eventKey)
-
-            lastPressTimes[config.eventKey] = currentTime
-            delay(config.delay)
+        when (event) {
+            is EventType.Delay -> delay(event.timeUnit.delay())
+            is EventType.KeyPress -> {
+                event.timeUnit?.let {
+                    val lastPressTime = lastPressTimes[event.key] ?: 0L
+                    if (currentTime - lastPressTime >= it.delay()) robot.keyPress(event.key)
+                }?: run { robot.keyPress(event.key) }
+            }
+            is EventType.KeyRelease -> robot.keyRelease(event.key)
+            is EventType.MousePress -> {
+                event.timeUnit?.let {
+                    val lastPressTime = lastPressTimes[event.key] ?: 0L
+                    if (currentTime - lastPressTime >= it.delay()) robot.mousePress(event.key)
+                }?: run { robot.mousePress(event.key) }
+            }
+            is EventType.MouseRelease -> robot.mouseRelease(event.key)
         }
     }
 }

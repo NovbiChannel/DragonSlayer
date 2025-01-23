@@ -1,19 +1,26 @@
 package ru.chaglovne.l2.components.editor.ui_logic
 
 import DEFAULT_DELAY
+import EventType
+import InputType
 import LoopType
+import Macro
+import MouseKeyCodes
 import TimeUnit
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.update
+import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent
 import ru.chaglovne.l2.components.input.ui_logic.DefaultTextInputComponent
 import ru.chaglovne.l2.components.input.ui_logic.TextInputComponent
+import ru.chaglovne.l2.database.DatabaseManager
 import java.awt.event.KeyEvent
 import java.awt.event.MouseEvent
 
 class DefaultEditorComponent(
-    componentContext: ComponentContext
+    componentContext: ComponentContext,
+    private val database: DatabaseManager
 ): EditorComponent, ComponentContext by componentContext {
     private val _model =
         MutableValue(
@@ -38,7 +45,8 @@ class DefaultEditorComponent(
             is EditorComponent.Output.Select -> { onEventSelect(output.eventId) }
             is EditorComponent.Output.SetDelay -> { onDelayChange(eventId = output.eventId, timeUnit = output.timeUnit) }
             is EditorComponent.Output.SetInterval -> { onIntervalChange(eventId = output.eventId, timeUnit = output.timeUnit) }
-            EditorComponent.Output.Clear -> { onClear() }
+            is EditorComponent.Output.Clear -> { onClear() }
+            is EditorComponent.Output.SaveData -> { database.addMacro(_model.value.toMacro(output.type)) }
         }
     }
 
@@ -47,16 +55,16 @@ class DefaultEditorComponent(
             _model.update { it.copy(title = inputChange) }
         }
 
-    override fun onAddEvent(type: EditorComponent.EventType) {
+    override fun onAddEvent(type: EventType) {
         val defaultDelayTitle = "Задержка $DEFAULT_DELAY" + TimeUnit.Millisecond(DEFAULT_DELAY.toInt()).getName()
 
         fun createDelayEvent(id: Int) = EditorComponent.Event(
             id = id,
-            eventType = EditorComponent.EventType.Delay(),
+            eventType = EventType.Delay(),
             title = defaultDelayTitle
         )
 
-        fun createEvent(id: Int, eventType: EditorComponent.EventType, title: String) = EditorComponent.Event(
+        fun createEvent(id: Int, eventType: EventType, title: String) = EditorComponent.Event(
             id = id,
             eventType = eventType,
             title = title
@@ -65,23 +73,23 @@ class DefaultEditorComponent(
         _model.update {
             val id = it.events.lastIndex + 1
             val events = when (type) {
-                is EditorComponent.EventType.Delay -> listOf(
+                is EventType.Delay -> listOf(
                     createEvent(id, type, "Задержка ${type.timeUnit.delay()}" + type.timeUnit.getName())
                 )
-                is EditorComponent.EventType.KeyPress -> listOf(
-                    createEvent(id, type, "Нажать клавишу ${KeyEvent.getKeyText(type.key)}"),
+                is EventType.KeyPress -> listOf(
+                    createEvent(id, type, "Нажать клавишу ${NativeKeyEvent.getKeyText(type.key)}"),
                     createDelayEvent(id + 1)
                 )
-                is EditorComponent.EventType.KeyRelease -> listOf(
-                    createEvent(id, type, "Отпустить клавишу ${KeyEvent.getKeyText(type.key)}"),
+                is EventType.KeyRelease -> listOf(
+                    createEvent(id, type, "Отпустить клавишу ${NativeKeyEvent.getKeyText(type.key)}"),
                     createDelayEvent(id + 1)
                 )
-                is EditorComponent.EventType.MousePress -> listOf(
-                    createEvent(id, type, "Нажать кнопку мыши ${MouseEvent.getMouseModifiersText(type.key)}"),
+                is EventType.MousePress -> listOf(
+                    createEvent(id, type, "Нажать кнопку мыши ${MouseKeyCodes.getKeyName(type.key)}"),
                     createDelayEvent(id + 1)
                 )
-                is EditorComponent.EventType.MouseRelease -> listOf(
-                    createEvent(id, type, "Отпустить кнопку мыши ${MouseEvent.getMouseModifiersText(type.key)}"),
+                is EventType.MouseRelease -> listOf(
+                    createEvent(id, type, "Отпустить кнопку мыши ${MouseKeyCodes.getKeyName(type.key)}"),
                     createDelayEvent(id + 1)
                 )
             }
@@ -143,7 +151,7 @@ class DefaultEditorComponent(
         val event = _model.value.events.find { it.id == eventId }
         event?.let { existingEvent  ->
             when (val type = existingEvent.eventType) {
-                is EditorComponent.EventType.Delay -> {
+                is EventType.Delay -> {
                     val updatedType = type.copy(timeUnit = timeUnit)
                     updateEvent(eventId) { event ->
                         event.copy(
@@ -161,10 +169,10 @@ class DefaultEditorComponent(
         val event = _model.value.events.find { it.id == eventId }
         event?.let { existingEvent ->
             when (val type = existingEvent.eventType) {
-                is EditorComponent.EventType.KeyPress -> {
+                is EventType.KeyPress -> {
                     val updatedType = type.copy(timeUnit = timeUnit)
                     updateEvent(eventId) { event ->
-                        var title = "Нажать клавишу ${KeyEvent.getKeyText(type.key)}"
+                        var title = "Нажать клавишу ${NativeKeyEvent.getKeyText(type.key)}"
                         if (timeUnit.value > 0) {
                             title = title + ", Интервал нажатия ${timeUnit.value}" + timeUnit.getName()
                         }
@@ -174,10 +182,10 @@ class DefaultEditorComponent(
                         )
                     }
                 }
-                is EditorComponent.EventType.MousePress -> {
+                is EventType.MousePress -> {
                     val updatedType = type.copy(timeUnit = timeUnit)
                     updateEvent(eventId) { event ->
-                        var title = "Нажать кнопку мыши ${MouseEvent.getMouseModifiersText(type.key)}"
+                        var title = "Нажать кнопку мыши ${MouseKeyCodes.getKeyName(type.key)}"
                         if (timeUnit.value > 0) {
                             title = title + ", Интервал нажатия ${timeUnit.value}" + timeUnit.getName()
                         }
@@ -209,4 +217,13 @@ class DefaultEditorComponent(
             model.copy(events = updatedEvents)
         }
     }
+    private fun EditorComponent.Model.toMacro(inputType: InputType): Macro =
+        Macro(
+            title = this.title,
+            isPublic = false,
+            description = null,
+            inputType = inputType,
+            loopType = this.loopType,
+            events = this.events.map { it.eventType }
+        )
 }

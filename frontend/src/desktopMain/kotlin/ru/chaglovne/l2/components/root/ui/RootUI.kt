@@ -9,6 +9,7 @@ import androidx.compose.material.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -25,6 +26,8 @@ import ru.chaglovne.l2.theme.Colors
 @Composable
 fun RootContent(component: RootComponent) {
     val stack by component.stack.subscribeAsState()
+    val model by component.model.subscribeAsState()
+
     val snackbarHostState = remember { SnackbarHostState() }
     Row(
         Modifier
@@ -35,11 +38,8 @@ fun RootContent(component: RootComponent) {
         SideMenu(
             modifier = Modifier.weight(1f),
             snackbarHostState = snackbarHostState,
-            onMacroClick = { component.onMacrosTabClicked() },
-            onEditorClick = { component.onEditorTabClicked() },
-            onSettingsClick = { component.onSettingsTabClicked() },
-            onProfileClick = { component.onProfileTabClicked() },
-            onMacroStartStop = { isLaunched -> component.onMacroStartStop(isLaunched) }
+            outputHandler = component::outputHandler,
+            model = model
         )
         Spacer(Modifier.width(16.dp))
         ContentView(Modifier.weight(3f)) { modifier ->
@@ -49,12 +49,15 @@ fun RootContent(component: RootComponent) {
                 },
                 backgroundColor = Color.Transparent
             ) {
-                Box(modifier
-                    .fillMaxSize()
-                    .background(
-                        color = Colors.primaryContainer,
-                        shape = RoundedCornerShape(10.dp)
-                    )) {
+                Box(
+                    modifier = modifier
+                        .fillMaxSize()
+                        .background(
+                            color = Colors.primaryContainer,
+                            shape = RoundedCornerShape(10.dp)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
                     when (val child = stack.active.instance) {
                         is RootComponent.Child.EditorChild -> EditorContent(child.component, snackbarHostState)
                         is RootComponent.Child.MacroChild -> MacrosContent(child.component)

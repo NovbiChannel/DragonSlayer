@@ -1,6 +1,9 @@
 package ru.chaglovne.l2.components.editor.ui
 
+import EventType
+import InputType
 import LoopType
+import MouseKeyCodes
 import TimeUnit
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -16,12 +19,16 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
+import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import l2macros.frontend.generated.resources.*
+import onInputListener
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import ru.chaglovne.l2.components.counters.ui.CounterUI
@@ -30,11 +37,7 @@ import ru.chaglovne.l2.components.dialog.ui.DialogUI
 import ru.chaglovne.l2.components.dialog.ui_logic.DefaultDialogComponent
 import ru.chaglovne.l2.components.editor.ui_logic.EditorComponent
 import ru.chaglovne.l2.components.input.ui.TextInputUI
-import ru.chaglovne.l2.components.input.ui_logic.DefaultTextInputComponent
-import ru.chaglovne.l2.compose_ui.AccentButton
-import ru.chaglovne.l2.compose_ui.InformingDashboard
-import ru.chaglovne.l2.compose_ui.Keyboard
-import ru.chaglovne.l2.compose_ui.Mouse
+import ru.chaglovne.l2.compose_ui.*
 import ru.chaglovne.l2.theme.Colors
 
 @Composable
@@ -43,6 +46,7 @@ fun EditorContent(component: EditorComponent, snackbarHostState: SnackbarHostSta
     val model by component.model.subscribeAsState()
     var dropDownExpand by remember { mutableStateOf(false) }
     var isShowDialog by remember { mutableStateOf(false) }
+    var isShowSaveDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier.fillMaxSize().padding(4.dp),
@@ -58,8 +62,8 @@ fun EditorContent(component: EditorComponent, snackbarHostState: SnackbarHostSta
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Keyboard { keyCode ->
-                component.onAddEvent(EditorComponent.EventType.KeyPress(keyCode))
-                component.onAddEvent(EditorComponent.EventType.KeyRelease(keyCode))
+                component.onAddEvent(EventType.KeyPress(keyCode))
+                component.onAddEvent(EventType.KeyRelease(keyCode))
             }
             Column(
                 modifier = Modifier.wrapContentHeight(),
@@ -70,7 +74,7 @@ fun EditorContent(component: EditorComponent, snackbarHostState: SnackbarHostSta
                 ) {
                     Button(
                         onClick = {
-                            component.onAddEvent(EditorComponent.EventType.Delay())
+                            component.onAddEvent(EventType.Delay())
                         },
                         shape = RoundedCornerShape(4.dp),
                         colors = ButtonDefaults.buttonColors(
@@ -157,8 +161,8 @@ fun EditorContent(component: EditorComponent, snackbarHostState: SnackbarHostSta
                     }
                 }
                 Mouse { keyCode ->
-                    component.onAddEvent(EditorComponent.EventType.MousePress(keyCode))
-                    component.onAddEvent(EditorComponent.EventType.MouseRelease(keyCode))
+                    component.onAddEvent(EventType.MousePress(keyCode))
+                    component.onAddEvent(EventType.MouseRelease(keyCode))
                 }
             }
         }
@@ -181,9 +185,7 @@ fun EditorContent(component: EditorComponent, snackbarHostState: SnackbarHostSta
                 if (model.title.isBlank()) {
                     component.textInputComponent.onError()
                     scope.launch { snackbarHostState.showSnackbar("Введите наименование макроса") }
-                } else {
-                    println(model)
-                }
+                } else { isShowSaveDialog = true }
             }
         }
     }
@@ -196,6 +198,16 @@ fun EditorContent(component: EditorComponent, snackbarHostState: SnackbarHostSta
         ) {
             isShowDialog = false
             component.outputHandler(EditorComponent.Output.Clear)
+        }
+    }
+
+    if (isShowSaveDialog) {
+        SaveMacroDialog(onDismissed = { isShowSaveDialog = false }) { type ->
+            isShowSaveDialog = false
+            component.outputHandler(EditorComponent.Output.SaveData(type))
+            scope.launch {
+                snackbarHostState.showSnackbar("Макрос успешно сохранён")
+            }
         }
     }
 }
@@ -260,9 +272,9 @@ fun EventItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             val resource = when(event.eventType) {
-                is EditorComponent.EventType.Delay -> Res.drawable.access_time
-                is EditorComponent.EventType.KeyPress, is EditorComponent.EventType.KeyRelease -> Res.drawable.enter_key
-                is EditorComponent.EventType.MousePress, is EditorComponent.EventType.MouseRelease -> Res.drawable.solar_mouse_linear
+                is EventType.Delay -> Res.drawable.access_time
+                is EventType.KeyPress, is EventType.KeyRelease -> Res.drawable.enter_key
+                is EventType.MousePress, is EventType.MouseRelease -> Res.drawable.solar_mouse_linear
             }
 
             Image(
@@ -280,7 +292,7 @@ fun EventItem(
             Spacer(Modifier.weight(1f))
 
             if (event.id == selectedItemId) {
-                val isReleaseEvent = event.eventType is EditorComponent.EventType.KeyRelease || event.eventType is EditorComponent.EventType.MouseRelease
+                val isReleaseEvent = event.eventType is EventType.KeyRelease || event.eventType is EventType.MouseRelease
                 ItemInteractions(
                     event = event,
                     isReleaseEvent = isReleaseEvent,
@@ -305,21 +317,21 @@ fun ItemInteractions(
     IconButton(Res.drawable.mdi_delete_outline) { outputHandler(EditorComponent.Output.Delete(event.id)) }
 
     when (event.eventType) {
-        is EditorComponent.EventType.Delay -> {
+        is EventType.Delay -> {
             if (isShowDialog) DelayEditorDialog(event, outputHandler) { isShowDialog = false }
         }
-        is EditorComponent.EventType.KeyPress, is EditorComponent.EventType.MousePress-> {
+        is EventType.KeyPress, is EventType.MousePress-> {
             if (isShowDialog) KeyPressIntervalEditorDialog(event, outputHandler) { isShowDialog = false }
         }
         else -> {}
     }
 }
 
-private fun getInitialTimeUnit(type: EditorComponent.EventType): TimeUnit {
+private fun getInitialTimeUnit(type: EventType): TimeUnit {
     return when (type) {
-        is EditorComponent.EventType.KeyPress -> type.timeUnit ?: TimeUnit.Millisecond(0)
-        is EditorComponent.EventType.MousePress -> type.timeUnit ?: TimeUnit.Millisecond(0)
-        is EditorComponent.EventType.Delay -> type.timeUnit
+        is EventType.KeyPress -> type.timeUnit ?: TimeUnit.Millisecond(0)
+        is EventType.MousePress -> type.timeUnit ?: TimeUnit.Millisecond(0)
+        is EventType.Delay -> type.timeUnit
         else -> TimeUnit.Millisecond(TimeUnit.DEFAULT_VALUE)
     }
 }
@@ -365,29 +377,32 @@ private fun TimeUnitEditorDialog(
                 timeUnit.value = count
                 println(timeUnit.value)
             }
-            Row(
-                modifier = Modifier
-                    .width(100.dp)
-                    .height(42.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .clickable { isShowDropMenu = !isShowDropMenu }
-                    .background(Colors.onAccentColor),
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Spacer(Modifier.width(16.dp))
-                Text(
-                    text = timeUnit.getName(),
-                    color = Colors.textColor,
-                    fontSize = 14.sp,
-                    modifier = Modifier.weight(1f)
-                )
-                Icon(
-                    painter = painterResource(Res.drawable.arrow_down),
-                    contentDescription = null,
-                    modifier = Modifier.size(10.dp),
-                    tint = Colors.textColor
-                )
+            Box {
+                Row(
+                    modifier = Modifier
+                        .width(100.dp)
+                        .height(42.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable { isShowDropMenu = !isShowDropMenu }
+                        .background(Colors.onAccentColor),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Spacer(Modifier.width(16.dp))
+                    Text(
+                        text = timeUnit.getName(),
+                        color = Colors.textColor,
+                        fontSize = 14.sp,
+                        modifier = Modifier.weight(1f).padding(0.dp)
+                    )
+                    Icon(
+                        painter = painterResource(Res.drawable.arrow_down),
+                        contentDescription = null,
+                        modifier = Modifier.size(10.dp),
+                        tint = Colors.textColor
+                    )
+                    Spacer(Modifier.width(16.dp))
+                }
                 if (isShowDropMenu) {
                     DropTimeUnitMenu(
                         delay = timeUnit.value,
@@ -395,7 +410,6 @@ private fun TimeUnitEditorDialog(
                         dismissed = { isShowDropMenu = false }
                     )
                 }
-                Spacer(Modifier.width(16.dp))
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -412,10 +426,10 @@ private fun TimeUnitEditorDialog(
                 onDismissed()
 
                 when (event.eventType) {
-                    is EditorComponent.EventType.Delay -> {
+                    is EventType.Delay -> {
                         outputHandler(EditorComponent.Output.SetDelay(event.id, timeUnit))
                     }
-                    is EditorComponent.EventType.KeyPress, is EditorComponent.EventType.MousePress -> {
+                    is EventType.KeyPress, is EventType.MousePress -> {
                         outputHandler(EditorComponent.Output.SetInterval(event.id, timeUnit))
                     }
                     else -> {}
@@ -451,20 +465,49 @@ private fun ConfirmationDialog(title: String, message: String, onDismissed: () -
     }
 }
 
+@OptIn(DelicateCoroutinesApi::class)
+@Composable
+private fun SaveMacroDialog(onDismissed: () -> Unit, onSuccess: (InputType) -> Unit) {
+    // Создаем корутинный скоуп, связанный с жизненным циклом компонента
+    val coroutineScope = rememberCoroutineScope()
+
+    // Используем LaunchedEffect для управления жизненным циклом слушателя
+    DisposableEffect(Unit) {
+        val listenerJob = onInputListener(coroutineScope) { inputType ->
+            onSuccess(inputType)
+        }
+
+        onDispose { listenerJob.cancel() }
+    }
+
+    DialogUI(
+        DefaultDialogComponent(
+            title = "Почти все готово!",
+            onDismissed = onDismissed
+        )
+    ) {
+        Text(
+            text = "Теперь вам нужно нажать на клавишу или кнопку мыши,\nкоторая будет использоваться для запуска\nи остановки вашего макроса.",
+            color = Colors.textColor,
+            fontSize = 14.sp
+        )
+    }
+}
+
 @Composable
 private fun DropTimeUnitMenu(delay: Int, callback: (TimeUnit) -> Unit, dismissed: () -> Unit) {
     var dropDownExpand by remember { mutableStateOf(true) }
-    DropdownMenu(
+
+    androidx.compose.material3.DropdownMenu(
         expanded = dropDownExpand,
         onDismissRequest = {
             dropDownExpand = false
             dismissed()
         },
-        modifier = Modifier
-            .background(
-                color = Colors.background
-            )
+        containerColor = Colors.background,
+        shape = RoundedCornerShape(8.dp)
     ) {
+
         val timeUnits = listOf(TimeUnit.Millisecond(delay), TimeUnit.Seconds(delay), TimeUnit.Minutes(delay))
         timeUnits.forEach { TimeUnitMenuItem(it, callback) { dropDownExpand = false } }
     }

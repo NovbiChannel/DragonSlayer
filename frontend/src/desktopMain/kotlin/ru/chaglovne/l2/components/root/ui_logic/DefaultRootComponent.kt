@@ -2,23 +2,26 @@ package ru.chaglovne.l2.components.root.ui_logic
 
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.*
+import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
+import com.arkivanov.decompose.value.update
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-import macro.seEssenceMPRegen
 import macroStart
 import ru.chaglovne.l2.components.editor.ui_logic.DefaultEditorComponent
 import ru.chaglovne.l2.components.macros.ui_logic.DefaultMacrosComponent
 import ru.chaglovne.l2.components.profile.ui_logic.DefaultProfileComponent
-import ru.chaglovne.l2.components.settings.ui_logic.DefaultSettingsComponent
+import ru.chaglovne.l2.database.DatabaseManager
 
 class DefaultRootComponent(
     componentContext: ComponentContext
 ): RootComponent, ComponentContext by componentContext {
+    private val databaseManager = DatabaseManager("/home/nikita/IdeaProjects/L2Macros/database/src/commonMain/kotlin/sqlite/myDatabase.db")
     private var macroJob: Job? = null
     private val navigation = StackNavigation<Config>()
+    private val _model = MutableValue(RootComponent.Model(isMacroSelected = true, isEditorSelected = false, isProfileSelected = false))
     private val _stack = childStack(
         source = navigation,
         serializer = Config.serializer(),
@@ -26,20 +29,20 @@ class DefaultRootComponent(
         childFactory = ::child
     )
     override val stack: Value<ChildStack<*, RootComponent.Child>> = _stack
+    override val model: Value<RootComponent.Model> = _model
 
-    override fun onMacrosTabClicked() {
+    private fun onMacrosTabClicked() {
+        _model.update { it.copy(isMacroSelected = true, isProfileSelected = false, isEditorSelected = false) }
         navigation.bringToFront(Config.Macros)
     }
 
-    override fun onEditorTabClicked() {
+    private fun onEditorTabClicked() {
+        _model.update { it.copy(isMacroSelected = false, isProfileSelected = false, isEditorSelected = true) }
         navigation.bringToFront(Config.Editor)
     }
 
-    override fun onSettingsTabClicked() {
-        navigation.bringToFront(Config.Settings)
-    }
-
-    override fun onProfileTabClicked() {
+    private fun onProfileTabClicked() {
+        _model.update { it.copy(isMacroSelected = false, isProfileSelected = true, isEditorSelected = false) }
         navigation.bringToFront(Config.Profile)
     }
 
@@ -51,20 +54,29 @@ class DefaultRootComponent(
         navigation.popTo(index = toIndex)
     }
 
-    override fun onMacroStartStop(isLaunched: Boolean) {
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun onMacroStartStop(isLaunched: Boolean) {
         if (isLaunched) {
-            macroJob = GlobalScope.launch { macroStart(macros = listOf(seEssenceMPRegen)) }
+            macroJob = macroStart(macros = databaseManager.getMacros(), scope = GlobalScope)
         } else {
             macroJob?.cancel()
             macroJob = null
         }
     }
 
+    override fun outputHandler(output: RootComponent.Output) {
+        when (output) {
+            RootComponent.Output.EditorClick -> { onEditorTabClicked() }
+            RootComponent.Output.MacroClick -> { onMacrosTabClicked() }
+            RootComponent.Output.ProfileClick -> { onProfileTabClicked() }
+            is RootComponent.Output.MacroStartStop -> { onMacroStartStop(output.isLaunched) }
+        }
+    }
+
     private fun child(config: Config, componentContext: ComponentContext): RootComponent.Child =
         when (config) {
-            Config.Editor -> RootComponent.Child.EditorChild(DefaultEditorComponent(componentContext))
-            Config.Macros -> RootComponent.Child.MacroChild(DefaultMacrosComponent(componentContext))
-            Config.Settings -> RootComponent.Child.SettingsChild(DefaultSettingsComponent(componentContext))
+            Config.Editor -> RootComponent.Child.EditorChild(DefaultEditorComponent(componentContext, databaseManager))
+            Config.Macros -> RootComponent.Child.MacroChild(DefaultMacrosComponent(componentContext, databaseManager) { onEditorTabClicked() })
             Config.Profile -> RootComponent.Child.ProfileChild(DefaultProfileComponent(componentContext))
         }
 
@@ -74,8 +86,6 @@ class DefaultRootComponent(
         data object Macros: Config
         @Serializable
         data object Editor: Config
-        @Serializable
-        data object Settings: Config
         @Serializable
         data object Profile: Config
     }
