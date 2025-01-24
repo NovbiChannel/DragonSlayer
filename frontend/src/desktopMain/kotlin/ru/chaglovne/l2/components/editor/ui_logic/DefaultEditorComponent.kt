@@ -1,6 +1,7 @@
 package ru.chaglovne.l2.components.editor.ui_logic
 
 import DEFAULT_DELAY
+import EventManager
 import EventType
 import InputType
 import LoopType
@@ -12,6 +13,9 @@ import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.update
 import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import ru.chaglovne.l2.components.input.ui_logic.DefaultTextInputComponent
 import ru.chaglovne.l2.components.input.ui_logic.TextInputComponent
 import ru.chaglovne.l2.database.DatabaseManager
@@ -44,7 +48,10 @@ class DefaultEditorComponent(
             is EditorComponent.Output.SetDelay -> { onDelayChange(eventId = output.eventId, timeUnit = output.timeUnit) }
             is EditorComponent.Output.SetInterval -> { onIntervalChange(eventId = output.eventId, timeUnit = output.timeUnit) }
             is EditorComponent.Output.Clear -> { onClear() }
-            is EditorComponent.Output.SaveData -> { database.addMacro(_model.value.toMacro(output.type)) }
+            is EditorComponent.Output.SaveData -> {
+                val id = database.addMacro(_model.value.toMacro(output.type))
+                CoroutineScope(Dispatchers.IO).launch { EventManager.newRecordEvent(id) }
+            }
         }
     }
 
