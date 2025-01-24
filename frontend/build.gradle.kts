@@ -19,7 +19,7 @@ kotlin {
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
-            implementation(compose.material)
+            implementation(compose.material3)
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(libs.androidx.lifecycle.viewmodel)
@@ -31,6 +31,7 @@ kotlin {
             implementation(projects.coreModule)
             implementation(projects.apiModule)
             implementation(projects.commonModule)
+            implementation(projects.databaseModule)
         }
 
         desktopMain.dependencies {
@@ -44,7 +45,7 @@ compose.desktop {
         mainClass = "ru.chaglovne.l2.MainKt"
 
         nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
+            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Exe)
             packageName = "ru.chaglovne.l2"
             packageVersion = "$majore.$minore.$path"
         }

@@ -1,65 +1,23 @@
 package listeners
 
 import InputType
-import Macro
 import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent
 import com.github.kwhat.jnativehook.keyboard.NativeKeyListener
 import com.github.kwhat.jnativehook.mouse.NativeMouseEvent
 import com.github.kwhat.jnativehook.mouse.NativeMouseListener
-import notification.sendNotification
-import java.awt.event.MouseEvent
 
-class KeyListener(
-    private val macro: Macro,
-    private val runningMacros: MutableMap<Macro, Boolean>
-) : NativeKeyListener {
-
-    override fun nativeKeyPressed(e: NativeKeyEvent) {
-        when (val inputType = macro.inputType) {
-            is InputType.KEYBOARD -> {
-                if (e.keyCode == inputType.value) {
-                    toggleMacroState(macro, runningMacros)
-                }
-            }
-            is InputType.MOUSE -> {}
+class KeyboardListener(private val output: (InputType) -> Unit): NativeKeyListener {
+    override fun nativeKeyPressed(nativeEvent: NativeKeyEvent?) {
+        nativeEvent?.keyCode?.let { keyCode ->
+            output(InputType.KEYBOARD(keyCode))
         }
-
     }
 }
 
-class MouseListener(
-    private val macro: Macro,
-    private val runningMacros: MutableMap<Macro, Boolean>
-): NativeMouseListener {
-
+class MouseListener(private val output: (InputType) -> Unit): NativeMouseListener {
     override fun nativeMousePressed(nativeEvent: NativeMouseEvent?) {
-        when (val inputType = macro.inputType) {
-            is InputType.MOUSE -> {
-                if (nativeEvent?.button == inputType.value) {
-                    toggleMacroState(macro, runningMacros)
-                }
-            }
-            is InputType.KEYBOARD -> {}
+        nativeEvent?.button?.let { keyCode ->
+            output(InputType.MOUSE(keyCode))
         }
     }
-}
-
-
-private fun toggleMacroState(
-    macro: Macro,
-    runningMacros: MutableMap<Macro, Boolean>
-) {
-    val message: String
-    val key = when (val inputType = macro.inputType) {
-        is InputType.KEYBOARD -> inputType.value
-        is InputType.MOUSE -> inputType.value
-    }
-    if (runningMacros[macro] == true) {
-        runningMacros[macro] = false
-        message = "Макрос '${macro.title}' остановлен"
-    } else {
-        runningMacros[macro] = true
-        message = "Макрос '${macro.title}' запущен, для остановки нажми ${NativeKeyEvent.getKeyText(key)}"
-    }
-    sendNotification(message)
 }

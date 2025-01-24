@@ -9,14 +9,6 @@ object ApiClient: DragonSlayerAPI {
         defaultRequest { url("http://185.65.200.31:8080") }
     }
 
-    override fun getUserMacro(userId: Long): Macro {
-        TODO("Not yet implemented")
-    }
-
-    override fun getAllUserMacros(userId: Long): List<Macro> {
-        TODO("Not yet implemented")
-    }
-
     override suspend fun postAuthenticateParams(code: String, state: String, deviceId: String): Boolean {
         return try {
             val response = client.post("/auth/callback") {

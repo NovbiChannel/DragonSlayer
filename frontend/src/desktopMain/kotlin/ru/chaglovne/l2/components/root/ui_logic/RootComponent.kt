@@ -9,14 +9,11 @@ import ru.chaglovne.l2.components.settings.ui_logic.SettingsComponent
 
 interface RootComponent {
     val stack: Value<ChildStack<*, Child>>
+    val model: Value<Model>
 
-    fun onMacrosTabClicked()
-    fun onEditorTabClicked()
-    fun onSettingsTabClicked()
-    fun onProfileTabClicked()
     fun onBackClicked()
     fun onBackClicked(toIndex: Int)
-    fun onMacroStartStop(isLaunched: Boolean)
+    fun outputHandler(output: Output)
 
     sealed class Child {
         class MacroChild(val component: MacrosComponent): Child()
@@ -24,4 +21,17 @@ interface RootComponent {
         class SettingsChild(val component: SettingsComponent): Child()
         class ProfileChild(val component: ProfileComponent): Child()
     }
+
+    sealed class Output {
+        data object MacroClick: Output()
+        data object EditorClick: Output()
+        data object ProfileClick: Output()
+        data class MacroStartStop(val isLaunched: Boolean): Output()
+    }
+
+    data class Model(
+        val isMacroSelected: Boolean,
+        val isEditorSelected: Boolean,
+        val isProfileSelected: Boolean
+    )
 }

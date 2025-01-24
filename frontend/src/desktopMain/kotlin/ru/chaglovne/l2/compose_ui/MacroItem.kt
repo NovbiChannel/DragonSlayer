@@ -65,23 +65,7 @@ fun MacroItem(
                 )
             }
             Spacer(Modifier.width(8.dp))
-            Box(
-                modifier = Modifier
-                    .size(34.dp)
-                    .border(
-                        width = 1.dp,
-                        color = Color.White,
-                        shape = RoundedCornerShape(4.dp)
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                val fontSize = if (keyTitle.count() <= 2) 16.sp else 12.sp
-                Text(
-                    text = keyTitle,
-                    color = Colors.textColor,
-                    fontSize = fontSize,
-                )
-            }
+            KeyButton(keyTitle)
             Spacer(Modifier.width(8.dp))
             IconButton(
                 onClick = {
@@ -115,5 +99,26 @@ fun MacroItem(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun KeyButton(title: String) {
+    Box(
+        modifier = Modifier
+            .size(34.dp)
+            .border(
+                width = 1.dp,
+                color = Color.White,
+                shape = RoundedCornerShape(4.dp)
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        val fontSize = if (title.count() <= 2) 16.sp else 12.sp
+        Text(
+            text = title,
+            color = Colors.textColor,
+            fontSize = fontSize,
+        )
     }
 }
