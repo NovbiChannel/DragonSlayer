@@ -22,6 +22,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
+import com.github.kwhat.jnativehook.GlobalScreen
 import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -465,19 +466,17 @@ private fun ConfirmationDialog(title: String, message: String, onDismissed: () -
     }
 }
 
-@OptIn(DelicateCoroutinesApi::class)
 @Composable
 private fun SaveMacroDialog(onDismissed: () -> Unit, onSuccess: (InputType) -> Unit) {
-    // Создаем корутинный скоуп, связанный с жизненным циклом компонента
     val coroutineScope = rememberCoroutineScope()
 
-    // Используем LaunchedEffect для управления жизненным циклом слушателя
     DisposableEffect(Unit) {
-        val listenerJob = onInputListener(coroutineScope) { inputType ->
-            onSuccess(inputType)
-        }
+        val listenerJob = onInputListener(coroutineScope) { inputType -> onSuccess(inputType) }
 
-        onDispose { listenerJob.cancel() }
+        onDispose {
+            listenerJob.cancel()
+            GlobalScreen.unregisterNativeHook()
+        }
     }
 
     DialogUI(

@@ -15,8 +15,6 @@ import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent
 import ru.chaglovne.l2.components.input.ui_logic.DefaultTextInputComponent
 import ru.chaglovne.l2.components.input.ui_logic.TextInputComponent
 import ru.chaglovne.l2.database.DatabaseManager
-import java.awt.event.KeyEvent
-import java.awt.event.MouseEvent
 
 class DefaultEditorComponent(
     componentContext: ComponentContext,

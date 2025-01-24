@@ -14,11 +14,13 @@ import ru.chaglovne.l2.components.editor.ui_logic.DefaultEditorComponent
 import ru.chaglovne.l2.components.macros.ui_logic.DefaultMacrosComponent
 import ru.chaglovne.l2.components.profile.ui_logic.DefaultProfileComponent
 import ru.chaglovne.l2.database.DatabaseManager
+import java.io.File
 
 class DefaultRootComponent(
     componentContext: ComponentContext
 ): RootComponent, ComponentContext by componentContext {
-    private val databaseManager = DatabaseManager("/home/nikita/IdeaProjects/L2Macros/database/src/commonMain/kotlin/sqlite/myDatabase.db")
+    private val db = File("database.db")
+    private val databaseManager = DatabaseManager(db.absolutePath)
     private var macroJob: Job? = null
     private val navigation = StackNavigation<Config>()
     private val _model = MutableValue(RootComponent.Model(isMacroSelected = true, isEditorSelected = false, isProfileSelected = false))
