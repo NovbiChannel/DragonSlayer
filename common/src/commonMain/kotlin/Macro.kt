@@ -3,6 +3,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Macro(
+    var id: Int = 0,
     val title: String,
     val isPublic: Boolean = false,
     val description: String? = null,
