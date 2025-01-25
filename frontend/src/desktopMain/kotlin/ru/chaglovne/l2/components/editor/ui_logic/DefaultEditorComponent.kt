@@ -15,6 +15,7 @@ import com.arkivanov.decompose.value.update
 import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import ru.chaglovne.l2.components.input.ui_logic.DefaultTextInputComponent
 import ru.chaglovne.l2.components.input.ui_logic.TextInputComponent
@@ -24,6 +25,7 @@ class DefaultEditorComponent(
     componentContext: ComponentContext,
     private val database: DatabaseManager
 ): EditorComponent, ComponentContext by componentContext {
+    private val scope = CoroutineScope(Dispatchers.IO)
     private val _model =
         MutableValue(
             EditorComponent.Model(
@@ -50,7 +52,7 @@ class DefaultEditorComponent(
             is EditorComponent.Output.Clear -> { onClear() }
             is EditorComponent.Output.SaveData -> {
                 val id = database.addMacro(_model.value.toMacro(output.type))
-                CoroutineScope(Dispatchers.IO).launch { EventManager.newRecordEvent(id) }
+                scope.launch { EventManager.newRecordEvent(id) }
             }
         }
     }

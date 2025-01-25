@@ -11,6 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import l2macros.frontend.generated.resources.Res
 import l2macros.frontend.generated.resources.app_logo
@@ -74,7 +76,7 @@ fun SideMenu(
             Spacer(Modifier.weight(1F))
             PlayStopButton(isActive) {
                 isActive = !isActive
-                outputHandler(RootComponent.Output.MacroStartStop(isActive))
+                outputHandler(RootComponent.Output.MacroStartStop(isActive, scope))
                 val message = if (isActive) "Программа запущена" else "Программа остановлена"
                 scope.launch { snackbarHostState.showSnackbar(message) }
             }

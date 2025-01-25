@@ -10,20 +10,25 @@ import java.awt.event.MouseEvent
 import java.security.Key
 
 fun onInputListener(scope: CoroutineScope, output: (InputType) -> Unit): Job {
+    val mouseListener = MouseListener(output)
+    val keyboardListener = KeyboardListener(output)
     return scope.launch {
-        addListeners(output)
+        try {
+            if (!GlobalScreen.isNativeHookRegistered()) GlobalScreen.registerNativeHook()
 
-        while (isActive) {
-            delay(DEFAULT_DELAY)
+            GlobalScreen.addNativeKeyListener(keyboardListener)
+            GlobalScreen.addNativeMouseListener(mouseListener)
+
+            while (isActive) { delay(DEFAULT_DELAY) }
+        } finally {
+            GlobalScreen.removeNativeKeyListener(keyboardListener)
+            GlobalScreen.removeNativeMouseListener(mouseListener)
         }
-
-        GlobalScreen.unregisterNativeHook()
     }
 }
 
 fun macroStart(macros: List<Macro>, scope: CoroutineScope): Job {
-    println(macros)
-    return scope.launch {
+    return scope.launch(Dispatchers.IO) {
         val robot = Robot()
         val lastPressTimes = mutableMapOf<Int, Long>()
         val runningMacros = mutableMapOf<Macro, Boolean>()
@@ -49,37 +54,32 @@ fun macroStart(macros: List<Macro>, scope: CoroutineScope): Job {
             }
         }
 
-        while (isActive) {
-            macros.forEach { macro ->
-                if (runningMacros[macro] == true) {
-                    when (val loopType = macro.loopType) {
-                        is LoopType.SINGLE -> {
-                            execute(robot, lastPressTimes, macro)
-                            runningMacros[macro] = false
-                        }
-                        is LoopType.INFINITE -> {
-                            while (runningMacros[macro] == true) {
+        try {
+            while (isActive) {
+                macros.forEach { macro ->
+                    if (runningMacros[macro] == true) {
+                        when (val loopType = macro.loopType) {
+                            is LoopType.SINGLE -> {
                                 execute(robot, lastPressTimes, macro)
+                                runningMacros[macro] = false
                             }
-                        }
-                        is LoopType.CUSTOM -> {
-                            repeat(loopType.repetitions) {
-                                execute(robot, lastPressTimes, macro)
+                            is LoopType.INFINITE -> {
+                                while (runningMacros[macro] == true) {
+                                    execute(robot, lastPressTimes, macro)
+                                }
                             }
-                            runningMacros[macro] = false
+                            is LoopType.CUSTOM -> {
+                                repeat(loopType.repetitions) {
+                                    execute(robot, lastPressTimes, macro)
+                                }
+                                runningMacros[macro] = false
+                            }
                         }
                     }
                 }
             }
-        }
-        listenerJob.cancel()
+        } finally { listenerJob.cancel() }
     }
-}
-
-private fun addListeners(output: (InputType) -> Unit) {
-    GlobalScreen.registerNativeHook()
-    GlobalScreen.addNativeKeyListener(KeyboardListener(output))
-    GlobalScreen.addNativeMouseListener(MouseListener(output))
 }
 
 private suspend fun execute(

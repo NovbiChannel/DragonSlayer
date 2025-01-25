@@ -2,6 +2,7 @@ package ru.chaglovne.l2.components.root.ui_logic
 
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.value.Value
+import kotlinx.coroutines.CoroutineScope
 import ru.chaglovne.l2.components.editor.ui_logic.EditorComponent
 import ru.chaglovne.l2.components.macros.ui_logic.MacrosComponent
 import ru.chaglovne.l2.components.profile.ui_logic.ProfileComponent
@@ -26,7 +27,7 @@ interface RootComponent {
         data object MacroClick: Output()
         data object EditorClick: Output()
         data object ProfileClick: Output()
-        data class MacroStartStop(val isLaunched: Boolean): Output()
+        data class MacroStartStop(val isLaunched: Boolean, val scope: CoroutineScope): Output()
     }
 
     data class Model(

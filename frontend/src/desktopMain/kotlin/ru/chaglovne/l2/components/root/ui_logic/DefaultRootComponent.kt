@@ -5,6 +5,7 @@ import com.arkivanov.decompose.router.stack.*
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.update
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
@@ -56,10 +57,9 @@ class DefaultRootComponent(
         navigation.popTo(index = toIndex)
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
-    private fun onMacroStartStop(isLaunched: Boolean) {
+    private fun onMacroStartStop(isLaunched: Boolean, scope: CoroutineScope) {
         if (isLaunched) {
-            macroJob = macroStart(macros = databaseManager.getMacros(), scope = GlobalScope)
+            macroJob = macroStart(macros = databaseManager.getMacros(), scope = scope)
         } else {
             macroJob?.cancel()
             macroJob = null
@@ -71,7 +71,7 @@ class DefaultRootComponent(
             RootComponent.Output.EditorClick -> { onEditorTabClicked() }
             RootComponent.Output.MacroClick -> { onMacrosTabClicked() }
             RootComponent.Output.ProfileClick -> { onProfileTabClicked() }
-            is RootComponent.Output.MacroStartStop -> { onMacroStartStop(output.isLaunched) }
+            is RootComponent.Output.MacroStartStop -> { onMacroStartStop(output.isLaunched, output.scope) }
         }
     }
 

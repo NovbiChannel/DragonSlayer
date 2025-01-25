@@ -8,6 +8,7 @@ import androidx.compose.ui.window.rememberWindowState
 import com.arkivanov.decompose.DefaultComponentContext
 import com.arkivanov.decompose.extensions.compose.lifecycle.LifecycleController
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
+import com.github.kwhat.jnativehook.GlobalScreen
 import ru.chaglovne.l2.components.root.ui.RootContent
 import ru.chaglovne.l2.components.root.ui_logic.DefaultRootComponent
 
@@ -19,7 +20,10 @@ fun main() {
         LifecycleController(lifecycle, windowState)
 
         Window(
-            onCloseRequest = ::exitApplication,
+            onCloseRequest = {
+                GlobalScreen.unregisterNativeHook()
+                exitApplication()
+            },
             state = windowState,
             resizable = false,
             title = "Dragon Slayer"

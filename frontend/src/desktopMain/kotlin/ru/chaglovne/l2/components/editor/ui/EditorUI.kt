@@ -472,11 +472,7 @@ private fun SaveMacroDialog(onDismissed: () -> Unit, onSuccess: (InputType) -> U
 
     DisposableEffect(Unit) {
         val listenerJob = onInputListener(coroutineScope) { inputType -> onSuccess(inputType) }
-
-        onDispose {
-            listenerJob.cancel()
-            GlobalScreen.unregisterNativeHook()
-        }
+        onDispose { listenerJob.cancel() }
     }
 
     DialogUI(
