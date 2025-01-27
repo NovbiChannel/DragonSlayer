@@ -1,5 +1,6 @@
 package ru.chaglovne.l2.database
 
+import InputType
 import Macro
 import inputTypeModule
 import kotlinx.serialization.encodeToString
@@ -54,6 +55,12 @@ class DatabaseManager(private val dbFilePath: String): MacrosDAO {
         }
     }
 
+    override fun updateMacro(macro: Macro): Int {
+        return transaction {
+
+        }
+    }
+
     override fun getMacros(): List<Macro> {
         return transaction {
             Macros.selectAll().map { Macro(
@@ -85,5 +92,21 @@ class DatabaseManager(private val dbFilePath: String): MacrosDAO {
         } catch (e: NoSuchElementException) {
             null
         }
+    }
+
+    /*
+    Переписать проверку, при наличии элемента в базе и переданном идентификаторе возникает
+    IllegalArgumentException: Collection has more than one element.
+    */
+    override fun checkAvailabilityInput(inputType: InputType, macroId: Int?): Boolean {
+        return try {
+            transaction {
+                val rr = Macros.selectAll()
+                    .where { Macros.inputType.eq(json.encodeToString(inputType)) }
+                    .single()
+
+                macroId != null && rr[Macros.id] == macroId
+            }
+        } catch (e: NoSuchElementException) { true }
     }
 }

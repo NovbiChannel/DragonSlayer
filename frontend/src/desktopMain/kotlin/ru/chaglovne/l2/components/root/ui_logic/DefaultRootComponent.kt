@@ -1,5 +1,6 @@
 package ru.chaglovne.l2.components.root.ui_logic
 
+import Macro
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.*
 import com.arkivanov.decompose.value.MutableValue
@@ -39,9 +40,9 @@ class DefaultRootComponent(
         navigation.bringToFront(Config.Macros)
     }
 
-    private fun onEditorTabClicked() {
+    private fun onEditorTabClicked(macro: Macro? = null) {
         _model.update { it.copy(isMacroSelected = false, isProfileSelected = false, isEditorSelected = true) }
-        navigation.bringToFront(Config.Editor)
+        navigation.bringToFront(Config.Editor(macro))
     }
 
     private fun onProfileTabClicked() {
@@ -77,8 +78,12 @@ class DefaultRootComponent(
 
     private fun child(config: Config, componentContext: ComponentContext): RootComponent.Child =
         when (config) {
-            Config.Editor -> RootComponent.Child.EditorChild(DefaultEditorComponent(componentContext, databaseManager))
-            Config.Macros -> RootComponent.Child.MacroChild(DefaultMacrosComponent(componentContext, databaseManager) { onEditorTabClicked() })
+            is Config.Editor -> RootComponent.Child.EditorChild(DefaultEditorComponent(componentContext, databaseManager, config.macro))
+            Config.Macros -> RootComponent.Child.MacroChild(
+                DefaultMacrosComponent(componentContext, databaseManager) { macro ->
+                    onEditorTabClicked(macro)
+                }
+            )
             Config.Profile -> RootComponent.Child.ProfileChild(DefaultProfileComponent(componentContext))
         }
 
@@ -87,7 +92,7 @@ class DefaultRootComponent(
         @Serializable
         data object Macros: Config
         @Serializable
-        data object Editor: Config
+        data class Editor(val macro: Macro? = null): Config
         @Serializable
         data object Profile: Config
     }

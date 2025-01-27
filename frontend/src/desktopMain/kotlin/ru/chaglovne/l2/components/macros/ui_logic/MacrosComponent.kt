@@ -6,7 +6,7 @@ import com.arkivanov.decompose.value.Value
 interface MacrosComponent {
     val model: Value<Model>
 
-    fun onOpenEditor()
+    fun onOpenEditor(macro: Macro? = null)
 
     data class Model(
         val macros: List<Macro>

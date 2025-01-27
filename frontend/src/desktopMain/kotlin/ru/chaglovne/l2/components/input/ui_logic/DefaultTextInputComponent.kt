@@ -8,9 +8,10 @@ import com.arkivanov.decompose.value.update
 class DefaultTextInputComponent(
     componentContext: ComponentContext,
     placeholder: String,
+    initText: String? = null,
     private val output: (String) -> Unit
 ): TextInputComponent, ComponentContext by componentContext {
-    private val _model = MutableValue(TextInputComponent.Model(placeholder = placeholder))
+    private val _model = MutableValue(TextInputComponent.Model(placeholder = placeholder, input = initText?: ""))
     override val model: Value<TextInputComponent.Model> = _model
 
     override fun onInputChanged(input: String) {

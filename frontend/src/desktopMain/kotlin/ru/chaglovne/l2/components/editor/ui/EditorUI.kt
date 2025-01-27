@@ -1,5 +1,6 @@
 package ru.chaglovne.l2.components.editor.ui
 
+import EventManager
 import EventType
 import InputType
 import LoopType
@@ -48,6 +49,14 @@ fun EditorContent(component: EditorComponent, snackbarHostState: SnackbarHostSta
     var dropDownExpand by remember { mutableStateOf(false) }
     var isShowDialog by remember { mutableStateOf(false) }
     var isShowSaveDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(true) {
+        scope.launch {
+            EventManager.msgEventsFlow.collect { msg ->
+                snackbarHostState.showSnackbar(msg)
+            }
+        }
+    }
 
     Column(
         modifier = Modifier.fillMaxSize().padding(4.dp),
@@ -206,9 +215,6 @@ fun EditorContent(component: EditorComponent, snackbarHostState: SnackbarHostSta
         SaveMacroDialog(onDismissed = { isShowSaveDialog = false }) { type ->
             isShowSaveDialog = false
             component.outputHandler(EditorComponent.Output.SaveData(type))
-            scope.launch {
-                snackbarHostState.showSnackbar("Макрос успешно сохранён")
-            }
         }
     }
 }
@@ -486,6 +492,7 @@ private fun SaveMacroDialog(onDismissed: () -> Unit, onSuccess: (InputType) -> U
             color = Colors.textColor,
             fontSize = 14.sp
         )
+
     }
 }
 

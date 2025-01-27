@@ -24,7 +24,8 @@ import ru.chaglovne.l2.theme.Colors
 @Composable
 fun MacroItem(
     title: String,
-    keyTitle: String
+    keyTitle: String,
+    onEditMacro: () -> Unit
 ) {
     var isExpand by remember { mutableStateOf(false) }
     Box(
@@ -78,23 +79,24 @@ fun MacroItem(
                     contentDescription = null,
                     modifier = Modifier.size(24.dp)
                 )
-                DropdownMenu(
+                androidx.compose.material3.DropdownMenu(
                     expanded = isExpand,
                     onDismissRequest = { isExpand = false },
-                    modifier = Modifier
-                        .background(
-                            color = Colors.background
-                        )
+                    containerColor = Colors.background,
+                    shape = RoundedCornerShape(8.dp)
                 ) {
                     DropdownMenuItem(
-                        onClick = { if (isExpand) isExpand = false }
+                        onClick = {
+                            if (isExpand) isExpand = false
+                            onEditMacro()
+                        }
                     ) {
-                        Text(text = "Test1", color = Colors.textColor)
+                        Text(text = "Редактировать", color = Colors.textColor)
                     }
                     DropdownMenuItem(
                         onClick = { if (isExpand) isExpand = false }
                     ) {
-                        Text(text = "Test2", color = Colors.textColor)
+                        Text(text = "Удалить", color = Colors.textColor)
                     }
                 }
             }

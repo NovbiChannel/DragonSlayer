@@ -15,7 +15,6 @@ import com.arkivanov.decompose.value.update
 import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import ru.chaglovne.l2.components.input.ui_logic.DefaultTextInputComponent
 import ru.chaglovne.l2.components.input.ui_logic.TextInputComponent
@@ -23,16 +22,21 @@ import ru.chaglovne.l2.database.DatabaseManager
 
 class DefaultEditorComponent(
     componentContext: ComponentContext,
-    private val database: DatabaseManager
+    private val database: DatabaseManager,
+    private val macro: Macro? = null
 ): EditorComponent, ComponentContext by componentContext {
     private val scope = CoroutineScope(Dispatchers.IO)
     private val _model =
         MutableValue(
             EditorComponent.Model(
-                loopType = LoopType.INFINITE,
-                events = emptyList(),
-                selectedEventId = -1,
-                title = ""
+                loopType = macro?.loopType?: LoopType.INFINITE,
+                events = macro?.events?.mapIndexed { index, eventType ->  EditorComponent.Event(
+                    id = index,
+                    eventType = eventType,
+                    title = generateTitle(eventType)
+                ) }?: emptyList(),
+                selectedEventId = macro?.events?.lastIndex?: -1 ,
+                title = macro?.title?: ""
             )
         )
     override val model: Value<EditorComponent.Model> = _model
@@ -50,15 +54,25 @@ class DefaultEditorComponent(
             is EditorComponent.Output.SetDelay -> { onDelayChange(eventId = output.eventId, timeUnit = output.timeUnit) }
             is EditorComponent.Output.SetInterval -> { onIntervalChange(eventId = output.eventId, timeUnit = output.timeUnit) }
             is EditorComponent.Output.Clear -> { onClear() }
-            is EditorComponent.Output.SaveData -> {
-                val id = database.addMacro(_model.value.toMacro(output.type))
-                scope.launch { EventManager.newRecordEvent(id) }
-            }
+            is EditorComponent.Output.SaveData -> { onSaveChange(output.type) }
         }
     }
 
+    override fun setMacro(macro: Macro) {
+        _model.update { it.copy(
+            loopType = macro.loopType,
+            events = macro.events.mapIndexed { index, eventType -> EditorComponent.Event(
+                id = index,
+                eventType = eventType,
+                title = generateTitle(eventType)
+            ) },
+            selectedEventId = macro.events.lastIndex,
+            title = it.title
+        ) }
+    }
+
     override val textInputComponent: TextInputComponent =
-        DefaultTextInputComponent(componentContext, "Введите наименование макроса") { inputChange ->
+        DefaultTextInputComponent(componentContext, "Введите наименование макроса", initText = macro?.title) { inputChange ->
             _model.update { it.copy(title = inputChange) }
         }
 
@@ -80,23 +94,9 @@ class DefaultEditorComponent(
         _model.update {
             val id = it.events.lastIndex + 1
             val events = when (type) {
-                is EventType.Delay -> listOf(
-                    createEvent(id, type, "Задержка ${type.timeUnit.delay()}" + type.timeUnit.getName())
-                )
-                is EventType.KeyPress -> listOf(
-                    createEvent(id, type, "Нажать клавишу ${NativeKeyEvent.getKeyText(type.key)}"),
-                    createDelayEvent(id + 1)
-                )
-                is EventType.KeyRelease -> listOf(
-                    createEvent(id, type, "Отпустить клавишу ${NativeKeyEvent.getKeyText(type.key)}"),
-                    createDelayEvent(id + 1)
-                )
-                is EventType.MousePress -> listOf(
-                    createEvent(id, type, "Нажать кнопку мыши ${MouseKeyCodes.getKeyName(type.key)}"),
-                    createDelayEvent(id + 1)
-                )
-                is EventType.MouseRelease -> listOf(
-                    createEvent(id, type, "Отпустить кнопку мыши ${MouseKeyCodes.getKeyName(type.key)}"),
+                is EventType.Delay -> listOf(createEvent(id, type, generateTitle(type)))
+                else -> listOf(
+                    createEvent(id, type, generateTitle(type)),
                     createDelayEvent(id + 1)
                 )
             }
@@ -106,6 +106,16 @@ class DefaultEditorComponent(
                 events = updatedEvents,
                 selectedEventId = updatedEvents.last().id
             )
+        }
+    }
+
+    private fun generateTitle(eventType: EventType): String {
+        return when(eventType) {
+            is EventType.Delay -> "Задержка ${eventType.timeUnit.delay()}" + eventType.timeUnit.getName()
+            is EventType.KeyPress -> "Нажать клавишу ${NativeKeyEvent.getKeyText(eventType.key)}"
+            is EventType.KeyRelease -> "Отпустить клавишу ${NativeKeyEvent.getKeyText(eventType.key)}"
+            is EventType.MousePress -> "Нажать кнопку мыши ${MouseKeyCodes.getKeyName(eventType.key)}"
+            is EventType.MouseRelease -> "Отпустить кнопку мыши ${MouseKeyCodes.getKeyName(eventType.key)}"
         }
     }
 
@@ -204,6 +214,46 @@ class DefaultEditorComponent(
                 }
                 else -> return
             }
+        }
+    }
+
+    private fun onSaveChange(inputType: InputType) {
+        val macroData = _model.value.toMacro(inputType)
+        val message: String
+
+        val isNewMacro = macro == null
+        val isAvailable = if (isNewMacro) {
+            database.checkAvailabilityInput(inputType)
+        } else {
+            database.checkAvailabilityInput(inputType, macro?.id)
+        }
+
+        if (isAvailable) {
+            val id = if (isNewMacro) {
+                database.addMacro(macroData).also {
+                    message = "Макрос успешно сохранен"
+                }
+            } else {
+                database.addMacro(macroData).also {
+                    message = "Макрос успешно изменен"
+                }
+            }
+
+            scope.launch {
+                if (isNewMacro) {
+                    EventManager.newRecordEvent(id)
+                } else {
+                    EventManager.updateEvent(id)
+                }
+                EventManager.sendMessage(message)
+            }
+
+            if (isNewMacro) {
+                onClear()
+            }
+        } else {
+            message = "Упс... Кажется ты уже используешь эту кнопку для другого макроса"
+            scope.launch { EventManager.sendMessage(message) }
         }
     }
 

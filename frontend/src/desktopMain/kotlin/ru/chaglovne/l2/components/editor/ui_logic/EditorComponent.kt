@@ -3,6 +3,7 @@ package ru.chaglovne.l2.components.editor.ui_logic
 import EventType
 import InputType
 import LoopType
+import Macro
 import TimeUnit
 import com.arkivanov.decompose.value.Value
 import ru.chaglovne.l2.components.input.ui_logic.TextInputComponent
@@ -13,6 +14,7 @@ interface EditorComponent {
     fun setLoopType(loopType: LoopType)
     fun onAddEvent(type: EventType)
     fun outputHandler(output: Output)
+    fun setMacro(macro: Macro)
 
     val textInputComponent: TextInputComponent
 
