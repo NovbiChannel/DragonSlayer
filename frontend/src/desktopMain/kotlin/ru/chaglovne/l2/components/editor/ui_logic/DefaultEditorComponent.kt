@@ -111,12 +111,28 @@ class DefaultEditorComponent(
 
     private fun generateTitle(eventType: EventType): String {
         return when(eventType) {
-            is EventType.Delay -> "Задержка ${eventType.timeUnit.delay()}" + eventType.timeUnit.getName()
-            is EventType.KeyPress -> "Нажать клавишу ${NativeKeyEvent.getKeyText(eventType.key)}"
-            is EventType.KeyRelease -> "Отпустить клавишу ${NativeKeyEvent.getKeyText(eventType.key)}"
-            is EventType.MousePress -> "Нажать кнопку мыши ${MouseKeyCodes.getKeyName(eventType.key)}"
-            is EventType.MouseRelease -> "Отпустить кнопку мыши ${MouseKeyCodes.getKeyName(eventType.key)}"
+            is EventType.Delay -> "Задержка " +
+                    eventType.timeUnit.delay() +
+                    eventType.timeUnit.getName()
+            is EventType.KeyPress -> "Нажать клавишу " +
+                    NativeKeyEvent.getKeyText(eventType.key) +
+                    generateTimeUnitOptions(eventType.timeUnit)
+            is EventType.KeyRelease -> "Отпустить клавишу " +
+                    NativeKeyEvent.getKeyText(eventType.key)
+            is EventType.MousePress -> "Нажать кнопку мыши " +
+                    MouseKeyCodes.getKeyName(eventType.key) +
+                    generateTimeUnitOptions(eventType.timeUnit)
+            is EventType.MouseRelease -> "Отпустить кнопку мыши " +
+                    MouseKeyCodes.getKeyName(eventType.key)
         }
+    }
+
+    private fun generateTimeUnitOptions(timeUnit: TimeUnit?): String {
+        return timeUnit?.let {
+            if (timeUnit.value > 0) {
+                ", Интервал нажатия " + timeUnit.value + timeUnit.getName()
+            } else { "" }
+        }?: ""
     }
 
     private fun onDeleteEvent(eventId: Int) {

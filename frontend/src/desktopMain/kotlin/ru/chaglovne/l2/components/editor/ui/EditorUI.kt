@@ -4,7 +4,6 @@ import EventManager
 import EventType
 import InputType
 import LoopType
-import MouseKeyCodes
 import TimeUnit
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -23,11 +22,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
-import com.github.kwhat.jnativehook.GlobalScreen
-import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import l2macros.frontend.generated.resources.*
 import onInputListener
@@ -39,24 +33,19 @@ import ru.chaglovne.l2.components.dialog.ui.DialogUI
 import ru.chaglovne.l2.components.dialog.ui_logic.DefaultDialogComponent
 import ru.chaglovne.l2.components.editor.ui_logic.EditorComponent
 import ru.chaglovne.l2.components.input.ui.TextInputUI
-import ru.chaglovne.l2.compose_ui.*
+import ru.chaglovne.l2.compose_ui.AccentButton
+import ru.chaglovne.l2.compose_ui.InformingDashboard
+import ru.chaglovne.l2.compose_ui.Keyboard
+import ru.chaglovne.l2.compose_ui.Mouse
 import ru.chaglovne.l2.theme.Colors
 
 @Composable
-fun EditorContent(component: EditorComponent, snackbarHostState: SnackbarHostState) {
+fun EditorContent(component: EditorComponent) {
     val scope = rememberCoroutineScope()
     val model by component.model.subscribeAsState()
     var dropDownExpand by remember { mutableStateOf(false) }
     var isShowDialog by remember { mutableStateOf(false) }
     var isShowSaveDialog by remember { mutableStateOf(false) }
-
-    LaunchedEffect(true) {
-        scope.launch {
-            EventManager.msgEventsFlow.collect { msg ->
-                snackbarHostState.showSnackbar(msg)
-            }
-        }
-    }
 
     Column(
         modifier = Modifier.fillMaxSize().padding(4.dp),
@@ -194,7 +183,7 @@ fun EditorContent(component: EditorComponent, snackbarHostState: SnackbarHostSta
             ) {
                 if (model.title.isBlank()) {
                     component.textInputComponent.onError()
-                    scope.launch { snackbarHostState.showSnackbar("Введите наименование макроса") }
+                    scope.launch { EventManager.sendMessage("Введите наименование макроса") }
                 } else { isShowSaveDialog = true }
             }
         }

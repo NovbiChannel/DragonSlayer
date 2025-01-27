@@ -18,19 +18,21 @@ class DefaultMacrosComponent(
     private val databaseManager: DatabaseManager,
     private val onOpenEditor: (macro: Macro?) -> Unit
 ): MacrosComponent, ComponentContext by componentContext {
+    private val scope = CoroutineScope(Dispatchers.Default)
     private val _model = MutableValue(
         MacrosComponent.Model(
-            macros = databaseManager.getMacros()
+            macros = databaseManager.getAllMacros()
         )
     )
     private var eventJob: Job? = null
 
     init {
-        eventJob = CoroutineScope(Dispatchers.IO).launch {
+        eventJob = scope.launch(Dispatchers.IO) {
             EventManager.dbEventsFlow.collect { event ->
                 when (event) {
                     is DatabaseEvents.NewRecord -> addMacroToList(event.macroId)
                     is DatabaseEvents.Update -> updateMacro(event.macroId)
+                    is DatabaseEvents.Delete -> deleteMacro(event.macroId)
                 }
             }
         }
@@ -38,6 +40,8 @@ class DefaultMacrosComponent(
 
     override val model: Value<MacrosComponent.Model> = _model
     override fun onOpenEditor(macro: Macro?) = onOpenEditor.invoke(macro)
+    override fun onDeleteMacro(macroId: Int) = deleteMacro(macroId)
+
     private fun addMacroToList(receiveId: Int) {
         val newMacro = databaseManager.getMacro(receiveId)
         newMacro?.let { _model.update { it.copy(macros = _model.value.macros + newMacro) } }
@@ -46,14 +50,29 @@ class DefaultMacrosComponent(
         val newMacro = databaseManager.getMacro(receiveId)
         newMacro?.let {
             _model.value.macros.forEachIndexed { index, macro ->
-                if (macro.id == newMacro.id) {
+                if (macro.id == receiveId) {
                     _model.update {
-                        val newList = _model.value.macros.toMutableList()
+                        val newList = it.macros.toMutableList()
                         newList[index] = newMacro
                         it.copy(macros = newList)
                     }
                 }
             }
+        }
+    }
+    private fun deleteMacro(receiveId: Int) {
+        val isSuccess = databaseManager.deleteMacro(receiveId)
+        if (isSuccess) {
+            _model.value.macros.forEachIndexed { index, macro ->
+                if (macro.id == receiveId) {
+                    _model.update {
+                        val newList = it.macros.toMutableList()
+                        newList.removeAt(index)
+                        it.copy(macros = newList)
+                    }
+                }
+            }
+            scope.launch { EventManager.sendMessage("Макрос удален") }
         }
     }
 }

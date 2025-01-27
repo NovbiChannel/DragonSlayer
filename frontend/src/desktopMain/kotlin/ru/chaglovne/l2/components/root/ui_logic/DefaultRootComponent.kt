@@ -7,8 +7,6 @@ import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.update
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.serialization.Serializable
 import macroStart
@@ -60,7 +58,7 @@ class DefaultRootComponent(
 
     private fun onMacroStartStop(isLaunched: Boolean, scope: CoroutineScope) {
         if (isLaunched) {
-            macroJob = macroStart(macros = databaseManager.getMacros(), scope = scope)
+            macroJob = macroStart(macros = databaseManager.getAllMacros(), scope = scope)
         } else {
             macroJob?.cancel()
             macroJob = null

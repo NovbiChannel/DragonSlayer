@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
@@ -25,7 +24,8 @@ import ru.chaglovne.l2.theme.Colors
 fun MacroItem(
     title: String,
     keyTitle: String,
-    onEditMacro: () -> Unit
+    onEditMacro: () -> Unit,
+    onDeleteMacro: () -> Unit
 ) {
     var isExpand by remember { mutableStateOf(false) }
     Box(
@@ -94,7 +94,10 @@ fun MacroItem(
                         Text(text = "Редактировать", color = Colors.textColor)
                     }
                     DropdownMenuItem(
-                        onClick = { if (isExpand) isExpand = false }
+                        onClick = {
+                            if (isExpand) isExpand = false
+                            onDeleteMacro()
+                        }
                     ) {
                         Text(text = "Удалить", color = Colors.textColor)
                     }

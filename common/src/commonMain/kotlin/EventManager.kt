@@ -11,5 +11,7 @@ object EventManager {
 
     suspend fun newRecordEvent(recordId: Int) = _dbEventsFlow.emit(DatabaseEvents.NewRecord(recordId))
     suspend fun updateEvent(recordId: Int) = _dbEventsFlow.emit(DatabaseEvents.Update(recordId))
+    suspend fun deleteEvent(recordId: Int) = _dbEventsFlow.emit(DatabaseEvents.Delete(recordId))
+
     suspend fun sendMessage(message: String) = _msgEventsFlow.emit(message)
 }

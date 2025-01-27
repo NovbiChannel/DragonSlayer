@@ -5,8 +5,9 @@ import Macro
 
 interface MacrosDAO {
     fun addMacro(macro: Macro): Int
-    fun updateMacro(macro: Macro): Int
-    fun getMacros(): List<Macro>
+    fun updateMacro(macro: Macro): Boolean
+    fun getAllMacros(): List<Macro>
     fun getMacro(id: Int): Macro?
+    fun deleteMacro(id: Int): Boolean
     fun checkAvailabilityInput(inputType: InputType, macroId: Int? = null): Boolean
 }

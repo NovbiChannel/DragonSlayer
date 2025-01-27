@@ -32,7 +32,12 @@ fun MacrosContent(component: MacrosComponent) {
                     is InputType.KEYBOARD -> NativeKeyEvent.getKeyText(type.value)
                     is InputType.MOUSE -> MouseKeyCodes.getKeyName(type.value)
                 }
-                MacroItem(title = item.title, keyTitle = keyTitle) { component.onOpenEditor(item) }
+                MacroItem(
+                    title = item.title,
+                    keyTitle = keyTitle,
+                    onEditMacro = { component.onOpenEditor(item) },
+                    onDeleteMacro = { component.onDeleteMacro(item.id) }
+                )
             }
         }
     } else {

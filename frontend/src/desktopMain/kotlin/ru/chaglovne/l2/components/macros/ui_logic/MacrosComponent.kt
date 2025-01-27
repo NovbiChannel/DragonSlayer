@@ -7,6 +7,7 @@ interface MacrosComponent {
     val model: Value<Model>
 
     fun onOpenEditor(macro: Macro? = null)
+    fun onDeleteMacro(macroId: Int)
 
     data class Model(
         val macros: List<Macro>

@@ -6,14 +6,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Scaffold
 import androidx.compose.material.SnackbarHost
 import androidx.compose.material.SnackbarHostState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
+import kotlinx.coroutines.launch
 import ru.chaglovne.l2.components.editor.ui.EditorContent
 import ru.chaglovne.l2.components.macros.ui.MacrosContent
 import ru.chaglovne.l2.components.profile.ui.ProfileContent
@@ -25,10 +24,20 @@ import ru.chaglovne.l2.theme.Colors
 
 @Composable
 fun RootContent(component: RootComponent) {
+    val scope = rememberCoroutineScope()
     val stack by component.stack.subscribeAsState()
     val model by component.model.subscribeAsState()
 
     val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(true) {
+        scope.launch {
+            EventManager.msgEventsFlow.collect { msg ->
+                snackbarHostState.showSnackbar(msg)
+            }
+        }
+    }
+
     Row(
         Modifier
             .fillMaxSize()
@@ -59,7 +68,7 @@ fun RootContent(component: RootComponent) {
                     contentAlignment = Alignment.Center
                 ) {
                     when (val child = stack.active.instance) {
-                        is RootComponent.Child.EditorChild -> EditorContent(child.component, snackbarHostState)
+                        is RootComponent.Child.EditorChild -> EditorContent(child.component)
                         is RootComponent.Child.MacroChild -> MacrosContent(child.component)
                         is RootComponent.Child.SettingsChild -> SettingsContent(child.component)
                         is RootComponent.Child.ProfileChild -> ProfileContent(child.component)
