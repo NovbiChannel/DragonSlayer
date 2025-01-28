@@ -17,10 +17,9 @@ import ru.chaglovne.l2.database.DatabaseManager
 import java.io.File
 
 class DefaultRootComponent(
-    componentContext: ComponentContext
+    componentContext: ComponentContext,
+    private val databaseManager: DatabaseManager
 ): RootComponent, ComponentContext by componentContext {
-    private val db = File("database.db")
-    private val databaseManager = DatabaseManager(db.absolutePath)
     private var macroJob: Job? = null
     private val navigation = StackNavigation<Config>()
     private val _model = MutableValue(RootComponent.Model(isMacroSelected = true, isEditorSelected = false, isProfileSelected = false))
