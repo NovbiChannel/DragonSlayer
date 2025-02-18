@@ -1,4 +1,6 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val majore = 1
 val minore = 0
@@ -46,7 +48,7 @@ compose.desktop {
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Exe)
-            packageName = "ru.chaglovne.l2"
+            packageName = "DragonSlayer"
             packageVersion = "$majore.$minore.$path"
         }
     }

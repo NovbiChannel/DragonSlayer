@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.Key
@@ -160,6 +161,7 @@ fun KeyButton(
     }
 }
 
+@NonRestartableComposable
 @Composable
 fun Keyboard(callback: (keyCode: Int) -> Unit) {
     Column(
