@@ -17,7 +17,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(compose.runtime)
-                implementation(projects.apiModule)
+                implementation(libs.coroutines)
             }
         }
         val jsMain by getting {

@@ -22,5 +22,16 @@ class DefaultProfileComponent(
         }
     }
 
-    override suspend fun wsConnect() = ApiClient.wsAuthenticateFlow(flow)
+    override suspend fun postAuthParams(code: String, state: String, deviceId: String) {
+        val userInfo = ApiClient.postAuthenticateParams(code, state, deviceId)
+        val authData = userInfo?.let {
+            DragonSlayerAPI.AuthData(DragonSlayerAPI.DataType.AuthSuccess, it.user.toString())
+        }?: DragonSlayerAPI.AuthData(DragonSlayerAPI.DataType.AuthError, "auth data is null")
+        flow.emit(authData)
+    }
+
+    override suspend fun getAuthUrl() {
+        val url = ApiClient.getAuthenticateUrl()?: return
+        flow.emit(DragonSlayerAPI.AuthData(DragonSlayerAPI.DataType.SendAuthUrl, url))
+    }
 }

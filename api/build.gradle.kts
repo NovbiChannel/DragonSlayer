@@ -9,7 +9,9 @@ repositories {
 
 kotlin {
     jvm("desktop")
-    js(IR)
+    js(IR) {
+        browser()
+    }
     sourceSets {
         val desktopMain by getting
         val jsMain by getting
@@ -19,6 +21,7 @@ kotlin {
             implementation(libs.ktor.client.contentNegotiation)
             implementation(libs.ktor.client.ws)
             implementation(libs.ktor.serialization.kotlinx.json)
+            implementation(libs.coroutines)
             implementation(projects.commonModule)
         }
 

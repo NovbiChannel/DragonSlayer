@@ -1,6 +1,4 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val majore = 1
 val minore = 0
@@ -24,6 +22,10 @@ kotlin {
             implementation(compose.material3)
             implementation(compose.ui)
             implementation(compose.components.resources)
+        }
+
+        desktopMain.dependencies {
+            implementation(compose.desktop.currentOs)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
             implementation(libs.decompose)
@@ -34,10 +36,7 @@ kotlin {
             implementation(projects.apiModule)
             implementation(projects.commonModule)
             implementation(projects.databaseModule)
-        }
-
-        desktopMain.dependencies {
-            implementation(compose.desktop.currentOs)
+            implementation(projects.webviewModule)
         }
     }
 }
@@ -50,6 +49,14 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Exe)
             packageName = "DragonSlayer"
             packageVersion = "$majore.$minore.$path"
+
+            windows {
+                iconFile.set(project.file("dragon_slayer.png"))
+                dirChooser = true
+            }
+            linux {
+                iconFile.set(project.file("dragon_slayer.png"))
+            }
         }
     }
 }

@@ -8,5 +8,6 @@ interface ProfileComponent {
     val flow: MutableSharedFlow<DragonSlayerAPI.AuthData>
     val isUserAuth: MutableValue<Boolean>
     fun openUrlInBrowser(url: String)
-    suspend fun wsConnect()
+    suspend fun postAuthParams(code: String, state: String, deviceId: String)
+    suspend fun getAuthUrl()
 }

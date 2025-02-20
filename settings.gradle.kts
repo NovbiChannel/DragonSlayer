@@ -27,14 +27,22 @@ pluginManagement {
         mavenCentral()
     }
 }
-include(":core")
-include(":api")
-include(":frontend")
-include(":common")
-include(":webCallback")
-include(":database")
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
+}
+
+include(
+    ":core",
+    ":api",
+    ":frontend",
+    ":common",
+    ":webCallback",
+    ":database",
+    ":webview_jfx"
+)
 
 findProject(":core")?.name = "core-module"
 findProject(":api")?.name = "api-module"
 findProject(":common")?.name = "common-module"
 findProject(":database")?.name = "database-module"
+findProject(":webview_jfx")?.name = "webview-module"

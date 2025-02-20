@@ -1,9 +1,6 @@
 package ui
 
-import ApiClient
-import ApiParams
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import errorSrc
 import kotlinx.browser.window
 import org.jetbrains.compose.web.css.*
@@ -16,9 +13,9 @@ fun RootUI() {
     val url = URL(window.location.href)
     val params = url.searchParams
 
-    val code = params.get(ApiParams.CODE)
-    val state = params.get(ApiParams.STATE)
-    val deviceId = params.get(ApiParams.DEVICE_ID)
+    val code = params.get("code")
+    val state = params.get("state")
+    val deviceId = params.get("device_id")
 
     Div(
         attrs = {
@@ -33,28 +30,14 @@ fun RootUI() {
                 backgroundColor(Color("#13171E"))
             }
         }
-    ) {
-
-        LaunchedEffect(true) {
-            if (state != null && deviceId != null && code != null) {
-                if (ApiClient.postAuthenticateParams(code, state, deviceId)) {
-                    Success()
-                } else {
-                    Error("Упс... Что-то пошло не так, проверь консоль")
-                }
-            } else {
-                Error("Упс... Что-то пошло не так, проверь консоль")
-                println("Receive params contains is null:\nstate=$state\ndeviceId=$deviceId\ncode=$code")
-            }
-        }
-    }
+    ) { if (state != null && deviceId != null && code != null) Success() else Error("Упс... Что-то пошло не так, попробуй чуть позже") }
 }
 
 @Composable
 fun Success() {
     SrcImage(successSrc)
     H1("Авторизация прошла успешно!")
-    P("Пожалуйста, вернитесь в приложение, чтобы продолжить.")
+    P("Это окно теперь можно закрыть")
 }
 
 @Composable

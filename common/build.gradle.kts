@@ -8,7 +8,9 @@ repositories {
 }
 
 kotlin {
-    js()
+    js(IR) {
+        browser()
+    }
     jvm("desktop")
     sourceSets {
         commonMain.dependencies {

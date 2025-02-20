@@ -1,10 +1,8 @@
 import io.ktor.client.*
-import io.ktor.client.plugins.websocket.*
+import io.ktor.client.call.*
 import io.ktor.client.request.*
-import io.ktor.http.*
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.isActive
 import kotlinx.serialization.json.Json
+import models.UserInfoResponse
 
 object ApiClient: DragonSlayerAPI {
     private val client = HttpClient(engineFactory()) {
@@ -16,27 +14,27 @@ object ApiClient: DragonSlayerAPI {
         websocketConfig(json)
     }
 
-    override suspend fun postAuthenticateParams(code: String, state: String, deviceId: String): Boolean {
+    override suspend fun getAuthenticateUrl(): String? {
         return try {
-            val response = client.post("http://185.65.200.31:8080/auth/callback") {
+            val response = client.get("http://192.168.0.106:8080/auth/url")
+            response.body<String>()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    override suspend fun postAuthenticateParams(code: String, state: String, deviceId: String): UserInfoResponse? {
+        return try {
+            val response = client.post("http://192.168.0.106:8080/auth/callback") {
                 parameter(ApiParams.CODE, code)
                 parameter(ApiParams.STATE, state)
                 parameter(ApiParams.DEVICE_ID, deviceId)
             }
-            response.status == HttpStatusCode.OK
+            response.body<UserInfoResponse>()
         } catch (e: Exception) {
-            println(e.message)
-            false
-        }
-    }
-
-    override suspend fun wsAuthenticateFlow(flow: MutableSharedFlow<DragonSlayerAPI.AuthData>) {
-        client.webSocket("ws://localhost:8080/ws/auth") {
-            while (isActive) {
-                val receive = receiveDeserialized<DragonSlayerAPI.WsDataReceive>()
-                val type = receive.type.stringToDataType()
-                flow.emit(DragonSlayerAPI.AuthData(type, receive.data))
-            }
+            e.printStackTrace()
+            null
         }
     }
 }

@@ -1,9 +1,10 @@
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.serialization.Serializable
+import models.UserInfoResponse
 
 interface DragonSlayerAPI {
-    suspend fun postAuthenticateParams(code: String, state: String, deviceId: String): Boolean
-    suspend fun wsAuthenticateFlow(flow: MutableSharedFlow<AuthData>)
+    suspend fun getAuthenticateUrl(): String?
+    suspend fun postAuthenticateParams(code: String, state: String, deviceId: String): UserInfoResponse?
     @Serializable
     data class WsDataReceive(
         val type: String,
