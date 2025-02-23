@@ -1,4 +1,4 @@
-rootProject.name = "L2Macros"
+rootProject.name = "DragonSlayerFrontend"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 dependencyResolutionManagement {
