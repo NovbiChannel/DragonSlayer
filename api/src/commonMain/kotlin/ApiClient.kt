@@ -16,7 +16,9 @@ object ApiClient: DragonSlayerAPI {
 
     override suspend fun getAuthenticateUrl(): String? {
         return try {
-            val response = client.get("http://192.168.0.106:8080/auth/url")
+            val response = client.get("http://192.168.0.106:8080/v1/authenticate/url") {
+                parameter("provider", "vk_id")
+            }
             response.body<String>()
         } catch (e: Exception) {
             e.printStackTrace()
@@ -26,7 +28,8 @@ object ApiClient: DragonSlayerAPI {
 
     override suspend fun postAuthenticateParams(code: String, state: String, deviceId: String): UserInfoResponse? {
         return try {
-            val response = client.post("http://192.168.0.106:8080/auth/callback") {
+            val response = client.post("http://192.168.0.106:8080/v1/authenticate/callback") {
+                parameter("provider", "vk_id")
                 parameter(ApiParams.CODE, code)
                 parameter(ApiParams.STATE, state)
                 parameter(ApiParams.DEVICE_ID, deviceId)

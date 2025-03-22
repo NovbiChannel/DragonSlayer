@@ -10,6 +10,7 @@ decompose = "3.2.2"
 sqlite-jdbc = "3.48.0.0"
 exposed = "0.58.0"
 fxPlugin = "0.0.13"
+junit = "4.13.2"
 
 
 [libraries]
@@ -43,6 +44,9 @@ androidx-lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle
 ##Decompose
 decompose = { module = "com.arkivanov.decompose:decompose", version.ref = "decompose" }
 decompose-extensions-compose = { module = "com.arkivanov.decompose:extensions-compose", version.ref = "decompose" }
+
+#Test's
+test-junit = { module = "junit:junit", version.ref = "junit" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

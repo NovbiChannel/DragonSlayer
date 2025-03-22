@@ -5,9 +5,9 @@ import listeners.KeyboardListener
 import listeners.MouseListener
 import notification.sendNotification
 import java.awt.Robot
+import java.awt.event.InputEvent
 import java.awt.event.KeyEvent
 import java.awt.event.MouseEvent
-import java.security.Key
 
 fun onInputListener(scope: CoroutineScope, output: (InputType) -> Unit): Job {
     val mouseListener = MouseListener(output)
@@ -104,7 +104,12 @@ private suspend fun execute(
     }
 
     fun handleMousePress(event: EventType.MousePress) {
-        handlePress(event.key, event.timeUnit) { robot.mousePress(event.key) }
+        val currentKey = convertMouseKeyCodesToAWTMouseMASK(nativeKeyCode = event.key)
+        handlePress(currentKey, event.timeUnit) { robot.mousePress(currentKey) }
+    }
+    fun handleMouserRelease(event: EventType.MouseRelease) {
+        val currentKey = convertMouseKeyCodesToAWTMouseMASK(nativeKeyCode = event.key)
+        robot.mouseRelease(currentKey)
     }
 
     macro.events.forEach { event ->
@@ -113,8 +118,15 @@ private suspend fun execute(
             is EventType.KeyPress -> handleKeyPress(event)
             is EventType.KeyRelease -> robot.keyRelease(convertNativeToAWTKeyCode(nativeKeyCode = event.key))
             is EventType.MousePress -> handleMousePress(event)
-            is EventType.MouseRelease -> robot.mouseRelease(event.key)
+            is EventType.MouseRelease -> handleMouserRelease(event)
         }
+    }
+}
+private fun convertMouseKeyCodesToAWTMouseMASK(nativeKeyCode: Int): Int {
+    return when (nativeKeyCode) {
+        MouseKeyCodes.BML -> MouseEvent.BUTTON1_DOWN_MASK
+        MouseKeyCodes.BMR -> MouseEvent.BUTTON2_DOWN_MASK
+        else -> throw IllegalArgumentException("Unknown mouse code")
     }
 }
 

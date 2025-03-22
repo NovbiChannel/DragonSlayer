@@ -10,20 +10,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent
 import l2macros.frontend.generated.resources.*
-import l2macros.frontend.generated.resources.Res
-import l2macros.frontend.generated.resources.arrow_left
-import l2macros.frontend.generated.resources.arrow_up
-import l2macros.frontend.generated.resources.mingcute_windows_fill
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import ru.chaglovne.l2.theme.Colors
-import java.awt.event.KeyEvent
 
 data class KeyButtonModel(
     val title: String,

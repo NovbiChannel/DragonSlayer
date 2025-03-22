@@ -14,6 +14,7 @@ dependencies {
     implementation(libs.coroutines)
     implementation(kotlin("stdlib"))
     implementation(projects.commonModule)
+    testImplementation(libs.test.junit)
 }
 
 application {
