@@ -14,8 +14,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import l2macros.frontend.generated.resources.Res
-import l2macros.frontend.generated.resources.character
+import dragonslayerfrontend.frontend.generated.resources.Res
+import dragonslayerfrontend.frontend.generated.resources.character
 import org.jetbrains.compose.resources.painterResource
 import ru.chaglovne.l2.theme.Colors
 

@@ -15,9 +15,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
-import l2macros.frontend.generated.resources.Res
-import l2macros.frontend.generated.resources.arrow_down
-import l2macros.frontend.generated.resources.arrow_up
+import dragonslayerfrontend.frontend.generated.resources.Res
+import dragonslayerfrontend.frontend.generated.resources.arrow_down
+import dragonslayerfrontend.frontend.generated.resources.arrow_up
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import ru.chaglovne.l2.components.counters.ui_logic.CounterComponent

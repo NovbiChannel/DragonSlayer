@@ -14,7 +14,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent
-import l2macros.frontend.generated.resources.*
+import dragonslayerfrontend.frontend.generated.resources.*
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import ru.chaglovne.l2.theme.Colors

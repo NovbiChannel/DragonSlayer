@@ -23,9 +23,9 @@ import extention.parseQueryString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import l2macros.frontend.generated.resources.Res
-import l2macros.frontend.generated.resources.character
-import l2macros.frontend.generated.resources.logo_vk_color_24
+import dragonslayerfrontend.frontend.generated.resources.Res
+import dragonslayerfrontend.frontend.generated.resources.character
+import dragonslayerfrontend.frontend.generated.resources.logo_vk_color_24
 import org.jetbrains.compose.resources.painterResource
 import ru.chaglovne.l2.components.profile.ui_logic.ProfileComponent
 import ru.chaglovne.l2.theme.Colors

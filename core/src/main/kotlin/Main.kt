@@ -5,7 +5,6 @@ import listeners.KeyboardListener
 import listeners.MouseListener
 import notification.sendNotification
 import java.awt.Robot
-import java.awt.event.InputEvent
 import java.awt.event.KeyEvent
 import java.awt.event.MouseEvent
 
@@ -102,12 +101,16 @@ private suspend fun execute(
         val currentKey = convertNativeToAWTKeyCode(nativeKeyCode = event.key)
         handlePress(currentKey, event.timeUnit) { robot.keyPress(currentKey) }
     }
+    fun handleKeyRelease(event: EventType.KeyRelease) {
+        val currentKey = convertNativeToAWTKeyCode(nativeKeyCode = event.key)
+        robot.keyRelease(currentKey)
+    }
 
     fun handleMousePress(event: EventType.MousePress) {
         val currentKey = convertMouseKeyCodesToAWTMouseMASK(nativeKeyCode = event.key)
         handlePress(currentKey, event.timeUnit) { robot.mousePress(currentKey) }
     }
-    fun handleMouserRelease(event: EventType.MouseRelease) {
+    fun handleMouseRelease(event: EventType.MouseRelease) {
         val currentKey = convertMouseKeyCodesToAWTMouseMASK(nativeKeyCode = event.key)
         robot.mouseRelease(currentKey)
     }
@@ -116,16 +119,16 @@ private suspend fun execute(
         when (event) {
             is EventType.Delay -> delay(event.timeUnit.delay())
             is EventType.KeyPress -> handleKeyPress(event)
-            is EventType.KeyRelease -> robot.keyRelease(convertNativeToAWTKeyCode(nativeKeyCode = event.key))
+            is EventType.KeyRelease -> handleKeyRelease(event)
             is EventType.MousePress -> handleMousePress(event)
-            is EventType.MouseRelease -> handleMouserRelease(event)
+            is EventType.MouseRelease -> handleMouseRelease(event)
         }
     }
 }
 private fun convertMouseKeyCodesToAWTMouseMASK(nativeKeyCode: Int): Int {
     return when (nativeKeyCode) {
         MouseKeyCodes.BML -> MouseEvent.BUTTON1_DOWN_MASK
-        MouseKeyCodes.BMR -> MouseEvent.BUTTON2_DOWN_MASK
+        MouseKeyCodes.BMR -> MouseEvent.BUTTON3_DOWN_MASK
         else -> throw IllegalArgumentException("Unknown mouse code")
     }
 }
@@ -206,6 +209,6 @@ private fun convertNativeToAWTKeyCode(nativeKeyCode: Int): Int {
         NativeKeyEvent.VC_RIGHT -> KeyEvent.VK_RIGHT
         NativeKeyEvent.VC_UP -> KeyEvent.VK_UP
         NativeKeyEvent.VC_DOWN -> KeyEvent.VK_DOWN
-        else -> -1
+        else -> throw IllegalArgumentException("Unknown key code")
     }
 }

@@ -9,9 +9,9 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import l2macros.frontend.generated.resources.Res
-import l2macros.frontend.generated.resources.play_icon
-import l2macros.frontend.generated.resources.stop_icon
+import dragonslayerfrontend.frontend.generated.resources.Res
+import dragonslayerfrontend.frontend.generated.resources.play_icon
+import dragonslayerfrontend.frontend.generated.resources.stop_icon
 import org.jetbrains.compose.resources.painterResource
 import ru.chaglovne.l2.theme.Colors
 

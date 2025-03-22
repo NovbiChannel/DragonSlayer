@@ -11,8 +11,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import l2macros.frontend.generated.resources.Res
-import l2macros.frontend.generated.resources.ic_baseline_close
+import dragonslayerfrontend.frontend.generated.resources.Res
+import dragonslayerfrontend.frontend.generated.resources.ic_baseline_close
 import ru.chaglovne.l2.components.dialog.ui_logic.DialogComponent
 import ru.chaglovne.l2.components.editor.ui.IconButton
 import ru.chaglovne.l2.theme.Colors

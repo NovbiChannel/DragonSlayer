@@ -11,11 +11,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import dragonslayerfrontend.frontend.generated.resources.Res
+import dragonslayerfrontend.frontend.generated.resources.app_logo
 import kotlinx.coroutines.launch
-import l2macros.frontend.generated.resources.Res
-import l2macros.frontend.generated.resources.app_logo
 import org.jetbrains.compose.resources.painterResource
 import ru.chaglovne.l2.components.root.ui_logic.RootComponent
 import ru.chaglovne.l2.theme.Colors
