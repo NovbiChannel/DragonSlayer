@@ -2,6 +2,7 @@ package ru.chaglovne.l2
 
 import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Tray
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
@@ -9,6 +10,9 @@ import com.arkivanov.decompose.DefaultComponentContext
 import com.arkivanov.decompose.extensions.compose.lifecycle.LifecycleController
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import com.github.kwhat.jnativehook.GlobalScreen
+import dragonslayerfrontend.frontend.generated.resources.Res
+import dragonslayerfrontend.frontend.generated.resources.app_logo
+import org.jetbrains.compose.resources.painterResource
 import ru.chaglovne.l2.components.root.ui.RootContent
 import ru.chaglovne.l2.components.root.ui_logic.DefaultRootComponent
 import ru.chaglovne.l2.database.DatabaseManager
@@ -30,6 +34,7 @@ fun main() {
                 exitApplication()
             },
             state = windowState,
+            icon = painterResource(Res.drawable.app_logo),
             resizable = false,
             title = "Dragon Slayer"
         ) {
