@@ -1,5 +1,6 @@
 package ru.chaglovne.l2.components.root.ui
 
+import EventManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,6 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import ru.chaglovne.l2.components.editor.ui.EditorContent
 import ru.chaglovne.l2.components.macros.ui.MacrosContent
@@ -32,9 +35,12 @@ fun RootContent(component: RootComponent) {
 
     LaunchedEffect(true) {
         scope.launch {
-            EventManager.msgEventsFlow.collect { msg ->
-                snackbarHostState.showSnackbar(msg)
-            }
+            EventManager
+                .msgEventsFlow
+                .onEach { msg ->
+                    snackbarHostState.showSnackbar(msg)
+                }
+                .launchIn(this)
         }
     }
 

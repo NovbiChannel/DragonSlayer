@@ -18,5 +18,8 @@ kotlin {
             implementation(libs.ktor.serialization.kotlinx.json)
             implementation(projects.commonModule)
         }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
     }
 }

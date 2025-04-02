@@ -1,5 +1,7 @@
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 
 @Serializable
 data class Macro(
@@ -11,6 +13,8 @@ data class Macro(
     val loopType: LoopType,
     val events: List<EventType>
 )
+
+fun String.decodeToListMacro(): List<Macro> = Json.decodeFromString<List<Macro>>(this)
 
 @Serializable
 @SerialName("event")
