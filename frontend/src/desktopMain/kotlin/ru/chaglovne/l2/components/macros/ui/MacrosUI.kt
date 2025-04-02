@@ -41,21 +41,27 @@ fun MacrosContent(component: MacrosComponent) {
             }
         }
     } else {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxWidth()
+        Box(
+            modifier = Modifier
+                .fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
-            InformingDashboard(
-                modifier = Modifier.wrapContentSize(),
-                imageSize = 100.dp,
-                fontSize = 14.sp,
-                text = "У вас пока нет макросов.\nЧтобы начать, откройте редактор и \nсоздайте свой первый макрос."
-            )
-            AccentButton(
-                title = "Создать макрос",
-                isSelected = true
-            ) { component.onOpenEditor() }
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.wrapContentSize()
+            ) {
+                InformingDashboard(
+                    modifier = Modifier.wrapContentSize(),
+                    imageSize = 100.dp,
+                    fontSize = 14.sp,
+                    text = "У вас пока нет макросов.\nЧтобы начать, откройте редактор и \nсоздайте свой первый макрос."
+                )
+                AccentButton(
+                    title = "Создать макрос",
+                    isSelected = true
+                ) { component.onOpenEditor() }
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 package ru.chaglovne.l2.components.root.ui
 
 import EventManager
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,6 +19,8 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import ru.chaglovne.l2.components.editor.ui.EditorContent
 import ru.chaglovne.l2.components.macros.ui.MacrosContent
+import ru.chaglovne.l2.components.profile.ui.AvatarSelectionContent
+import ru.chaglovne.l2.components.profile.ui.LoginContent
 import ru.chaglovne.l2.components.profile.ui.ProfileContent
 import ru.chaglovne.l2.components.root.ui_logic.RootComponent
 import ru.chaglovne.l2.components.settings.ui.SettingsContent
@@ -73,11 +76,15 @@ fun RootContent(component: RootComponent) {
                         ),
                     contentAlignment = Alignment.Center
                 ) {
-                    when (val child = stack.active.instance) {
-                        is RootComponent.Child.EditorChild -> EditorContent(child.component)
-                        is RootComponent.Child.MacroChild -> MacrosContent(child.component)
-                        is RootComponent.Child.SettingsChild -> SettingsContent(child.component)
-                        is RootComponent.Child.ProfileChild -> ProfileContent(child.component)
+                    Crossfade(targetState = stack.active.instance) { child ->
+                        when (child) {
+                            is RootComponent.Child.EditorChild -> EditorContent(child.component)
+                            is RootComponent.Child.MacroChild -> MacrosContent(child.component)
+                            is RootComponent.Child.SettingsChild -> SettingsContent(child.component)
+                            is RootComponent.Child.AvatarChild -> AvatarSelectionContent(child.component)
+                            is RootComponent.Child.LoginChild -> LoginContent(child.component)
+                            is RootComponent.Child.ProfileChild -> ProfileContent(child.component)
+                        }
                     }
                 }
             }

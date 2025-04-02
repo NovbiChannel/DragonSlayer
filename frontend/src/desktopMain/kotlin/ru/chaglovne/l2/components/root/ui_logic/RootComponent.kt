@@ -5,7 +5,9 @@ import com.arkivanov.decompose.value.Value
 import kotlinx.coroutines.CoroutineScope
 import ru.chaglovne.l2.components.editor.ui_logic.EditorComponent
 import ru.chaglovne.l2.components.macros.ui_logic.MacrosComponent
-import ru.chaglovne.l2.components.profile.ui_logic.ProfileComponent
+import ru.chaglovne.l2.components.profile.ui_logic.avatar_selection.AvatarSelectionComponent
+import ru.chaglovne.l2.components.profile.ui_logic.login.LoginComponent
+import ru.chaglovne.l2.components.profile.ui_logic.profile.ProfileComponent
 import ru.chaglovne.l2.components.settings.ui_logic.SettingsComponent
 
 interface RootComponent {
@@ -20,6 +22,8 @@ interface RootComponent {
         class MacroChild(val component: MacrosComponent): Child()
         class EditorChild(val component: EditorComponent): Child()
         class SettingsChild(val component: SettingsComponent): Child()
+        class LoginChild(val component: LoginComponent): Child()
+        class AvatarChild(val component: AvatarSelectionComponent): Child()
         class ProfileChild(val component: ProfileComponent): Child()
     }
 

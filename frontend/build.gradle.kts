@@ -37,6 +37,7 @@ kotlin {
             implementation(projects.commonModule)
             implementation(projects.databaseModule)
             implementation(projects.webviewModule)
+            implementation(projects.firebaseWrapper)
         }
     }
 }

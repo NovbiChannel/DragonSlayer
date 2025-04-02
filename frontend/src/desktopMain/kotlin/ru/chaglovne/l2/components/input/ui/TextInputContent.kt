@@ -14,6 +14,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -23,7 +24,11 @@ import ru.chaglovne.l2.theme.Colors
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun TextInputUI(component: TextInputComponent, modifier: Modifier = Modifier) {
+fun TextInputUI(
+    component: TextInputComponent,
+    modifier: Modifier = Modifier,
+    isPasswordInput: Boolean = false
+) {
     var isFocused by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
     val model by component.model.subscribeAsState()
@@ -31,6 +36,7 @@ fun TextInputUI(component: TextInputComponent, modifier: Modifier = Modifier) {
     BasicTextField(
         value = model.input,
         onValueChange = { change -> component.onInputChanged(change) },
+        visualTransformation = if (isPasswordInput) PasswordVisualTransformation() else VisualTransformation.None,
         modifier = modifier
             .border(
                 width = 2.dp,

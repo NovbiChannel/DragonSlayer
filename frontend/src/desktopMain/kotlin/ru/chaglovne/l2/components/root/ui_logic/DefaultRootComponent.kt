@@ -6,19 +6,23 @@ import com.arkivanov.decompose.router.stack.*
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.update
+import com.dragon_slayer.firebase.impl.FirebaseAuth
+import data.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.serialization.Serializable
 import macroStart
 import ru.chaglovne.l2.components.editor.ui_logic.DefaultEditorComponent
 import ru.chaglovne.l2.components.macros.ui_logic.DefaultMacrosComponent
-import ru.chaglovne.l2.components.profile.ui_logic.DefaultProfileComponent
+import ru.chaglovne.l2.components.profile.ui_logic.avatar_selection.DefaultAvatarSelectionComponent
+import ru.chaglovne.l2.components.profile.ui_logic.login.DefaultLoginComponent
+import ru.chaglovne.l2.components.profile.ui_logic.profile.DefaultProfileComponent
 import ru.chaglovne.l2.database.DatabaseManager
-import java.io.File
 
 class DefaultRootComponent(
     componentContext: ComponentContext,
-    private val databaseManager: DatabaseManager
+    private val databaseManager: DatabaseManager,
+    private val firebaseAuth: FirebaseAuth
 ): RootComponent, ComponentContext by componentContext {
     private var macroJob: Job? = null
     private val navigation = StackNavigation<Config>()
@@ -44,7 +48,7 @@ class DefaultRootComponent(
 
     private fun onProfileTabClicked() {
         _model.update { it.copy(isMacroSelected = false, isProfileSelected = true, isEditorSelected = false) }
-        navigation.bringToFront(Config.Profile)
+        navigation.bringToFront(Config.LoginScreen)
     }
 
     override fun onBackClicked() {
@@ -81,7 +85,30 @@ class DefaultRootComponent(
                     onEditorTabClicked(macro)
                 }
             )
-            Config.Profile -> RootComponent.Child.ProfileChild(DefaultProfileComponent(componentContext))
+            is Config.AvatarSelectionScreen -> RootComponent.Child.AvatarChild(
+                DefaultAvatarSelectionComponent(
+                    componentContext = componentContext,
+                    user = config.user,
+                    handleBackPress = { navigation.pop() },
+                    goToProfileScreen = { user ->
+                        navigation.bringToFront(Config.ProfileScreen(user))
+                    }
+                )
+            )
+            Config.LoginScreen -> RootComponent.Child.LoginChild(
+                DefaultLoginComponent(
+                    componentContext = componentContext,
+                    firebaseAuth = firebaseAuth,
+                    goToSelectedAvatar = { user ->
+                        navigation.bringToFront(Config.AvatarSelectionScreen(user))
+                    }
+                )
+            )
+            is Config.ProfileScreen -> RootComponent.Child.ProfileChild(
+                DefaultProfileComponent(
+                    componentContext = componentContext
+                )
+            )
         }
 
     @Serializable
@@ -91,6 +118,10 @@ class DefaultRootComponent(
         @Serializable
         data class Editor(val macro: Macro? = null): Config
         @Serializable
-        data object Profile: Config
+        data object LoginScreen: Config
+        @Serializable
+        data class ProfileScreen(val user: User): Config
+        @Serializable
+        data class AvatarSelectionScreen(val user: User): Config
     }
 }

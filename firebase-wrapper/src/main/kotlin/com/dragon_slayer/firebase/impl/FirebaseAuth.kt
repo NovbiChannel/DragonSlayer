@@ -85,34 +85,28 @@ class FirebaseAuth: FirebaseAuthRepository {
     }
 
     override suspend fun authorization(userName: String, password: String): Result<User, DataError> {
-        val usersResult = handleResult(MapSerializer(String.serializer(), FirebaseUserData.serializer())) {
-            client.get(Endpoints.GET_ALL_USERS_DATA)
+        val userDataResult = handleResult(FirebaseUserData.serializer()) {
+            client.get(Endpoints.userData(userName))
         }
-
-        return when (usersResult) {
-            is Result.Error -> usersResult
+        return when(userDataResult) {
+            is Result.Error -> userDataResult
             is Result.Success -> {
-                val users = usersResult.data
-                val userId = users.toList()
-                    .find { it.second.userName == userName && Encryption.decrypt(
-                        encryptedText = it.second.password,
-                        secretKey = Encryption.generateKey(userName)
-                    ) == password }
-                    ?.first
+                val userData = userDataResult.data
+                val decryptPassword = Encryption.decrypt(
+                    encryptedText = userData.password,
+                    secretKey = Encryption.generateKey(userName)
+                )
 
-                if (userId != null) {
-                    val userResult = handleResult(FirebaseUser .serializer()) {
-                        client.get(Endpoints.user(userId))
+                if (password == decryptPassword) {
+                    val userResult = handleResult(FirebaseUser.serializer()) {
+                        client.get(Endpoints.user(userName))
                     }
-
                     when (userResult) {
                         is Result.Error -> userResult
-                        is Result.Success -> {
-                            Result.Success(userResult.data.toUser ())
-                        }
+                        is Result.Success -> Result.Success(userResult.data.toUser())
                     }
                 } else {
-                    Result.Error(DataError.Status.USER_NOT_FOUND)
+                    Result.Error(DataError.Status.INVALID_PASSWORD)
                 }
             }
         }
@@ -130,12 +124,14 @@ class FirebaseAuth: FirebaseAuthRepository {
     ): Result<T, DataError> = withContext(Dispatchers.IO){
         return@withContext try {
             val response = async { call() }.await()
+            if (!response.isNotNull()) throw NullPointerException()
             println(response.bodyAsText())
             val data = Json.decodeFromString(serializer, response.bodyAsText())
             Result.Success(data)
         } catch (e: Exception) {
             e.printStackTrace()
             val dataError = when(e) {
+                is NullPointerException -> DataError.Status.USER_NOT_FOUND
                 is SerializationException -> DataError.Remote.SERIALIZATION
                 else -> DataError.Remote.UNKNOWN
             }
