@@ -9,17 +9,14 @@ import com.dragon_slayer.firebase.utils.onError
 import com.dragon_slayer.firebase.utils.onSuccess
 import com.dragon_slayer.firebase.utils.toMessage
 import data.User
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import ru.chaglovne.l2.components.input.ui_logic.DefaultTextInputComponent
 import ru.chaglovne.l2.components.input.ui_logic.TextInputComponent
 
 class DefaultLoginComponent(
     private val componentContext: ComponentContext,
     private val firebaseAuth: FirebaseAuth,
-    val goToSelectedAvatar: (User) -> Unit
+    private val goToSelectedAvatar: (User) -> Unit
 ): LoginComponent, ComponentContext by componentContext {
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val _model = MutableValue(LoginComponent.Model())
@@ -65,6 +62,7 @@ class DefaultLoginComponent(
                             user = user
                         )
                     }
+                    goToSelectedAvatar(user)
                 }
                 .onError { error ->
                     EventManager
@@ -88,6 +86,7 @@ class DefaultLoginComponent(
                             user = user
                         )
                     }
+                    goToSelectedAvatar(user)
                 }
                 .onError { error ->
                     EventManager

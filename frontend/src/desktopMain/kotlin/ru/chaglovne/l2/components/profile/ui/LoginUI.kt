@@ -6,6 +6,7 @@ import androidx.compose.material.Switch
 import androidx.compose.material.SwitchDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,6 +27,12 @@ import ru.chaglovne.l2.theme.Colors
 @Composable
 fun LoginContent(component: LoginComponent) {
     val model by component.model.subscribeAsState()
+
+    LaunchedEffect(model.user) {
+        model.user?.let { user ->
+            component
+        }
+    }
 
     val TextInputHeight = 43.dp
     Box(

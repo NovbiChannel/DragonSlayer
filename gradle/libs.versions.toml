@@ -11,6 +11,7 @@ sqlite-jdbc = "3.48.0.0"
 exposed = "0.58.0"
 fxPlugin = "0.0.13"
 junit = "4.13.2"
+coil = "3.1.0"
 
 
 [libraries]
@@ -40,6 +41,9 @@ sqlite-jdbc = { module = "org.xerial:sqlite-jdbc", version.ref = "sqlite-jdbc" }
 #--UI--
 androidx-lifecycle-viewmodel = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "androidx-lifecycle" }
 androidx-lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
+#Images
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
+coil-network = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil" }
 
 ##Decompose
 decompose = { module = "com.arkivanov.decompose:decompose", version.ref = "decompose" }

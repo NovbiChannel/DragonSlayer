@@ -14,6 +14,7 @@ kotlin {
     }
     sourceSets {
         val desktopMain by getting
+        val desktopTest by getting
         val jsMain by getting
 
         commonMain.dependencies {
@@ -23,6 +24,11 @@ kotlin {
             implementation(libs.ktor.serialization.kotlinx.json)
             implementation(libs.coroutines)
             implementation(projects.commonModule)
+        }
+
+        desktopTest.dependencies {
+            implementation(libs.coroutines)
+            implementation(kotlin("test"))
         }
 
         desktopMain.dependencies {
