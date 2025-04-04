@@ -53,7 +53,6 @@ fun main() {
                 exitApplication()
             },
             undecorated = true,
-            transparent = true,
             state = windowState,
             icon = painterResource(Res.drawable.app_logo),
             resizable = false,
@@ -63,8 +62,6 @@ fun main() {
             var dragStartPoint by remember { mutableStateOf(Point(0, 0)) }
 
             Column(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(16.dp))
             ) {
                 Box(
                     modifier = Modifier
