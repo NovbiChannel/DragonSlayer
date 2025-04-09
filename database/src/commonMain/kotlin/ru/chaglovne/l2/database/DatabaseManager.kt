@@ -18,6 +18,7 @@ import ru.chaglovne.l2.database.tables.Macros.description
 import ru.chaglovne.l2.database.tables.Macros.events
 import ru.chaglovne.l2.database.tables.Macros.inputType
 import ru.chaglovne.l2.database.tables.Macros.isPublic
+import ru.chaglovne.l2.database.tables.Macros.isShowNotification
 import ru.chaglovne.l2.database.tables.Macros.loopType
 import ru.chaglovne.l2.database.tables.Macros.title
 import timeUnitModule
@@ -60,6 +61,7 @@ class DatabaseManager(private val dbFilePath: String): MacrosDAO {
                     id = rr[Macros.id],
                     title = rr[title],
                     isPublic = rr[isPublic],
+                    isShowNotification = rr[isShowNotification],
                     description = rr[description],
                     inputType = json.decodeFromString(rr[inputType]),
                     loopType = json.decodeFromString(rr[loopType]),
@@ -77,6 +79,7 @@ class DatabaseManager(private val dbFilePath: String): MacrosDAO {
                     id = rr[Macros.id],
                     title = rr[title],
                     isPublic = rr[isPublic],
+                    isShowNotification = rr[isShowNotification],
                     description = rr[description],
                     inputType = json.decodeFromString(rr[inputType]),
                     loopType = json.decodeFromString(rr[loopType]),
@@ -114,6 +117,7 @@ class DatabaseManager(private val dbFilePath: String): MacrosDAO {
     private fun setMacroValues(builder: UpdateBuilder<Int>, macro: Macro) {
         builder[title] = macro.title
         builder[isPublic] = macro.isPublic
+        builder[isShowNotification] = macro.isShowNotification
         builder[description] = macro.description
         builder[inputType] = json.encodeToString(macro.inputType)
         builder[loopType] = json.encodeToString(macro.loopType)
