@@ -8,6 +8,7 @@ data class Macro(
     var id: Int = 0,
     val title: String,
     val isPublic: Boolean = false,
+    val isShowNotification: Boolean = true,
     val description: String? = null,
     val inputType: InputType,
     val loopType: LoopType,

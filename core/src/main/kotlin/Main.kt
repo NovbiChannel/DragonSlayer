@@ -36,20 +36,22 @@ fun macroStart(macros: List<Macro>, scope: CoroutineScope): Job {
             val findMacro = macros.find { it.inputType == inputType }
 
             findMacro?.let {
-                val message: String
-                val key = when (inputType) {
-                    is InputType.KEYBOARD -> inputType.value
-                    is InputType.MOUSE -> inputType.value
+                val inputKeyTitle = when(inputType) {
+                    is InputType.KEYBOARD -> NativeKeyEvent.getKeyText(inputType.value)
+                    is InputType.MOUSE -> MouseKeyCodes.getKeyName(inputType.value)
                 }
+                val message: String
                 if (runningMacros[findMacro] == true) {
                     runningMacros[findMacro] = false
                     message = "Макрос '${findMacro.title}' остановлен"
                 } else {
                     macros.forEach { macro -> if (macro != findMacro) runningMacros[macro] = false }
                     runningMacros[findMacro] = true
-                    message = "Макрос '${findMacro.title}' запущен, для остановки нажми ${NativeKeyEvent.getKeyText(key)}"
+                    message = "Макрос '${findMacro.title}' запущен, для остановки нажми $inputKeyTitle"
                 }
-                sendNotification(message)
+                if (it.isShowNotification) {
+                    sendNotification(message)
+                }
             }
         }
 

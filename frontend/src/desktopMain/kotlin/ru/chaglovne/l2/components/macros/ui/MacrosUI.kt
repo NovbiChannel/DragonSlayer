@@ -33,10 +33,11 @@ fun MacrosContent(component: MacrosComponent) {
                     is InputType.MOUSE -> MouseKeyCodes.getKeyName(type.value)
                 }
                 MacroItem(
-                    title = item.title,
+                    macro = item,
                     keyTitle = keyTitle,
                     onEditMacro = { component.onOpenEditor(item) },
-                    onDeleteMacro = { component.onDeleteMacro(item.id) }
+                    onDeleteMacro = { component.onDeleteMacro(item.id) },
+                    onChangeNotification = { component.onChangeNotificationSetting(item.id, it) }
                 )
             }
         }

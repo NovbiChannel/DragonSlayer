@@ -4,6 +4,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import listeners.MouseListener
 import org.junit.Test
+import java.awt.Toolkit
 
 
 class TestListeners {
@@ -20,5 +21,11 @@ class TestListeners {
         while (true) {
             delay(DEFAULT_DELAY)
         }
+    }
+
+    @Test
+    fun getImage() {
+        val image = Toolkit.getDefaultToolkit().getImage("resources/dragon_slayer.png")
+        println(image)
     }
 }
