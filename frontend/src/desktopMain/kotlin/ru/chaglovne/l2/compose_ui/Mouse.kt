@@ -1,6 +1,6 @@
 package ru.chaglovne.l2.compose_ui
 
-import MouseKeyCodes
+import mouse.MouseKeyCode
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -9,7 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ru.chaglovne.l2.theme.Colors
-import java.awt.event.MouseEvent
 
 @Composable
 fun Mouse(callback: (keyCode: Int) -> Unit) {
@@ -21,8 +20,8 @@ fun Mouse(callback: (keyCode: Int) -> Unit) {
             modifier = Modifier.weight(1f),
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            PrimaryMouseButton(Modifier.weight(1f)) { callback(MouseKeyCodes.BML) }
-            PrimaryMouseButton(Modifier.weight(1f)) { callback(MouseKeyCodes.BMR) }
+            PrimaryMouseButton(Modifier.weight(1f)) { callback(MouseKeyCode.BML) }
+            PrimaryMouseButton(Modifier.weight(1f)) { callback(MouseKeyCode.BMR) }
         }
         Row(
             modifier = Modifier.weight(1f),
@@ -31,8 +30,8 @@ fun Mouse(callback: (keyCode: Int) -> Unit) {
             Column(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                AdditionalMouseButton(Modifier.weight(1f)) { callback(MouseKeyCodes.MB5) }
-                AdditionalMouseButton(Modifier.weight(1f)) { callback(MouseKeyCodes.MB4) }
+                AdditionalMouseButton(Modifier.weight(1f)) { callback(MouseKeyCode.MB5) }
+                AdditionalMouseButton(Modifier.weight(1f)) { callback(MouseKeyCode.MB4) }
             }
             Box(
                 modifier = Modifier

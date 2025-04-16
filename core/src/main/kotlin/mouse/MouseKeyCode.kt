@@ -1,4 +1,6 @@
-object MouseKeyCodes {
+package mouse
+
+object MouseKeyCode {
     const val BML = 1
     const val BMR = 2
     const val MB4 = 4

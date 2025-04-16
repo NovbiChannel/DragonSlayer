@@ -6,7 +6,7 @@ import EventType
 import InputType
 import LoopType
 import Macro
-import MouseKeyCodes
+import mouse.MouseKeyCode
 import TimeUnit
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
@@ -120,10 +120,10 @@ class DefaultEditorComponent(
             is EventType.KeyRelease -> "Отпустить клавишу " +
                     NativeKeyEvent.getKeyText(eventType.key)
             is EventType.MousePress -> "Нажать кнопку мыши " +
-                    MouseKeyCodes.getKeyName(eventType.key) +
+                    MouseKeyCode.getKeyName(eventType.key) +
                     generateTimeUnitOptions(eventType.timeUnit)
             is EventType.MouseRelease -> "Отпустить кнопку мыши " +
-                    MouseKeyCodes.getKeyName(eventType.key)
+                    MouseKeyCode.getKeyName(eventType.key)
         }
     }
 
@@ -218,7 +218,7 @@ class DefaultEditorComponent(
                 is EventType.MousePress -> {
                     val updatedType = type.copy(timeUnit = timeUnit)
                     updateEvent(eventId) { event ->
-                        var title = "Нажать кнопку мыши ${MouseKeyCodes.getKeyName(type.key)}"
+                        var title = "Нажать кнопку мыши ${MouseKeyCode.getKeyName(type.key)}"
                         if (timeUnit.value > 0) {
                             title = title + ", Интервал нажатия ${timeUnit.value}" + timeUnit.getName()
                         }

@@ -1,7 +1,7 @@
 package ru.chaglovne.l2.components.macros.ui
 
 import InputType
-import MouseKeyCodes
+import mouse.MouseKeyCode
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -30,7 +30,7 @@ fun MacrosContent(component: MacrosComponent) {
             items(model.macros) { item ->
                 val keyTitle = when (val type = item.inputType) {
                     is InputType.KEYBOARD -> NativeKeyEvent.getKeyText(type.value)
-                    is InputType.MOUSE -> MouseKeyCodes.getKeyName(type.value)
+                    is InputType.MOUSE -> MouseKeyCode.getKeyName(type.value)
                 }
                 MacroItem(
                     macro = item,
