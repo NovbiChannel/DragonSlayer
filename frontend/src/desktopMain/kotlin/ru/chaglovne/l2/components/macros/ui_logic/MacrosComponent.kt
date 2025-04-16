@@ -8,6 +8,7 @@ interface MacrosComponent {
 
     fun onOpenEditor(macro: Macro? = null)
     fun onDeleteMacro(macroId: Int)
+    fun onChangeNotificationSetting(macroId: Int, isShowing: Boolean)
 
     data class Model(
         val macros: List<Macro>

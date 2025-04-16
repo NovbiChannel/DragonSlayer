@@ -6,6 +6,7 @@ object Macros: Table() {
     val id = integer("id").autoIncrement()
     val title = varchar("title", 20)
     val isPublic = bool("isPublic")
+    val isShowNotification = bool("isShowNotification")
     val description = text("description").nullable()
     val inputType = text("inputType")
     val loopType = text("loopType")

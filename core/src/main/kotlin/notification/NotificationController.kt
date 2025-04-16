@@ -1,7 +1,9 @@
 package notification
 
-import java.awt.*
-import java.io.File
+import java.awt.AWTException
+import java.awt.SystemTray
+import java.awt.Toolkit
+import java.awt.TrayIcon
 
 var trayIcon: TrayIcon? = null
 
@@ -12,8 +14,7 @@ fun sendNotification(message: String) {
     }
 
     try {
-        val currentPath = File(".").absolutePath
-        val trayIconImage = Toolkit.getDefaultToolkit().getImage("$currentPath/core/src/main/resources/dragon_slayer.png")
+        val trayIconImage = Toolkit.getDefaultToolkit().getImage("resources/dragon_slayer.png")
 
         if (trayIcon != null) {
             val tray = SystemTray.getSystemTray()

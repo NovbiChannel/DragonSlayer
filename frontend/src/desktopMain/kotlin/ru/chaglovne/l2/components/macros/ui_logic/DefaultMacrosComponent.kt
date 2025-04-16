@@ -24,16 +24,13 @@ class DefaultMacrosComponent(
             macros = databaseManager.getAllMacros()
         )
     )
-    private var eventJob: Job? = null
 
-    init {
-        eventJob = scope.launch(Dispatchers.IO) {
-            EventManager.dbEventsFlow.collect { event ->
-                when (event) {
-                    is DatabaseEvents.NewRecord -> addMacroToList(event.macroId)
-                    is DatabaseEvents.Update -> updateMacro(event.macroId)
-                    is DatabaseEvents.Delete -> deleteMacro(event.macroId)
-                }
+    private var eventJob = scope.launch(Dispatchers.IO) {
+        EventManager.dbEventsFlow.collect { event ->
+            when (event) {
+                is DatabaseEvents.NewRecord -> addMacroToList(event.macroId)
+                is DatabaseEvents.Update -> updateMacro(event.macroId)
+                is DatabaseEvents.Delete -> deleteMacro(event.macroId)
             }
         }
     }
@@ -41,6 +38,24 @@ class DefaultMacrosComponent(
     override val model: Value<MacrosComponent.Model> = _model
     override fun onOpenEditor(macro: Macro?) = onOpenEditor.invoke(macro)
     override fun onDeleteMacro(macroId: Int) = deleteMacro(macroId)
+    override fun onChangeNotificationSetting(macroId: Int, isShowing: Boolean) {
+        val findMacro = _model.value.macros.find { it.id == macroId }?: throw IllegalStateException("Not found macros for macroID: $macroId")
+        val updateMacro = findMacro.copy(
+            isShowNotification = isShowing
+        )
+        _model.value.macros.forEachIndexed { index, macro ->
+            if (macro.id == macroId) {
+                _model.update {
+                    val newList = it.macros.toMutableList()
+                    newList[index] = updateMacro
+                    it.copy(
+                        macros = newList
+                    )
+                }
+                databaseManager.updateMacro(updateMacro)
+            }
+        }
+    }
 
     private fun addMacroToList(receiveId: Int) {
         val newMacro = databaseManager.getMacro(receiveId)

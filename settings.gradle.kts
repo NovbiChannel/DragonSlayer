@@ -38,12 +38,10 @@ include(
     ":common",
     ":webCallback",
     ":database",
-    ":webview_jfx"
 )
 
 findProject(":core")?.name = "core-module"
 findProject(":api")?.name = "api-module"
 findProject(":common")?.name = "common-module"
 findProject(":database")?.name = "database-module"
-findProject(":webview_jfx")?.name = "webview-module"
 include("firebase-wrapper")

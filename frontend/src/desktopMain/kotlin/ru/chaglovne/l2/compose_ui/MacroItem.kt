@@ -1,5 +1,6 @@
 package ru.chaglovne.l2.compose_ui
 
+import Macro
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -7,6 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.IconButton
+import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,10 +24,11 @@ import ru.chaglovne.l2.theme.Colors
 
 @Composable
 fun MacroItem(
-    title: String,
+    macro: Macro,
     keyTitle: String,
     onEditMacro: () -> Unit,
-    onDeleteMacro: () -> Unit
+    onDeleteMacro: () -> Unit,
+    onChangeNotification: (Boolean) -> Unit
 ) {
     var isExpand by remember { mutableStateOf(false) }
     Box(
@@ -50,7 +53,7 @@ fun MacroItem(
             )
             Spacer(Modifier.width(16.dp))
             Text(
-                text = title,
+                text = macro.title,
                 color = Colors.textColor,
                 fontSize = 16.sp
             )
@@ -100,6 +103,20 @@ fun MacroItem(
                         }
                     ) {
                         Text(text = "Удалить", color = Colors.textColor)
+                    }
+                    DropdownMenuItem(
+                        onClick = {}
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(text = "Уведомления", color = Colors.textColor)
+                            Switch(
+                                checked = macro.isShowNotification,
+                                onCheckedChange = { onChangeNotification(it) }
+                            )
+                        }
                     }
                 }
             }
