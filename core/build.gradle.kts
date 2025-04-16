@@ -10,6 +10,8 @@ plugins {
 version = "$majore.$minore.$path"
 
 dependencies {
+    implementation(libs.jna)
+    implementation(libs.jna.platform)
     implementation(libs.jNativeHook)
     implementation(libs.coroutines)
     implementation(kotlin("stdlib"))

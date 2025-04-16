@@ -12,6 +12,7 @@ exposed = "0.58.0"
 fxPlugin = "0.0.13"
 junit = "4.13.2"
 coil = "3.1.0"
+jna = "5.13.0"
 
 
 [libraries]
@@ -22,6 +23,8 @@ agp-tools = { module = "com.android.tools.build:gradle", version.ref = "agp" }
 #---ROOT---
 jNativeHook = { module = "com.github.kwhat:jnativehook", version.ref = "jNativeHook" }
 coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+jna = { module = "net.java.dev.jna:jna", version.ref = "jna" }
+jna-platform = { module = "net.java.dev.jna:jna-platform", version.ref = "jna" }
 
 #---DOMAIN---
 #Ktor clien

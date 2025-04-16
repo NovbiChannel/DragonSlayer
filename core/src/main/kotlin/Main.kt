@@ -4,9 +4,8 @@ import kotlinx.coroutines.*
 import listeners.KeyboardListener
 import listeners.MouseListener
 import notification.sendNotification
-import java.awt.Robot
-import java.awt.event.KeyEvent
-import java.awt.event.MouseEvent
+import sender.DefaultInputSender
+import sender.InputSender
 
 fun onInputListener(scope: CoroutineScope, output: (InputType) -> Unit): Job {
     val mouseListener = MouseListener(output)
@@ -28,7 +27,7 @@ fun onInputListener(scope: CoroutineScope, output: (InputType) -> Unit): Job {
 
 fun macroStart(macros: List<Macro>, scope: CoroutineScope): Job {
     return scope.launch(Dispatchers.IO) {
-        val robot = Robot()
+        val sender = DefaultInputSender()
         val lastPressTimes = mutableMapOf<Int, Long>()
         val runningMacros = mutableMapOf<Macro, Boolean>()
 
@@ -59,17 +58,17 @@ fun macroStart(macros: List<Macro>, scope: CoroutineScope): Job {
                     if (runningMacros[macro] == true) {
                         when (val loopType = macro.loopType) {
                             is LoopType.SINGLE -> {
-                                execute(robot, lastPressTimes, macro)
+                                sender.execute(lastPressTimes, macro)
                                 runningMacros[macro] = false
                             }
                             is LoopType.INFINITE -> {
                                 while (runningMacros[macro] == true) {
-                                    execute(robot, lastPressTimes, macro)
+                                    sender.execute(lastPressTimes, macro)
                                 }
                             }
                             is LoopType.CUSTOM -> {
                                 repeat(loopType.repetitions) {
-                                    execute(robot, lastPressTimes, macro)
+                                    sender.execute(lastPressTimes, macro)
                                 }
                                 runningMacros[macro] = false
                             }
@@ -81,8 +80,7 @@ fun macroStart(macros: List<Macro>, scope: CoroutineScope): Job {
     }
 }
 
-private suspend fun execute(
-    robot: Robot,
+private suspend fun InputSender.execute(
     lastPressTimes: MutableMap<Int, Long>,
     macro: Macro
 ) {
@@ -98,21 +96,19 @@ private suspend fun execute(
     }
 
     fun handleKeyPress(event: EventType.KeyPress) {
-        val currentKey = convertNativeToAWTKeyCode(nativeKeyCode = event.key)
-        handlePress(currentKey, event.timeUnit) { robot.keyPress(currentKey) }
+        val currentKey = convertNativeToWindowsKeyCode(event.key)
+        handlePress(currentKey, event.timeUnit) { keyDown(currentKey) }
     }
     fun handleKeyRelease(event: EventType.KeyRelease) {
-        val currentKey = convertNativeToAWTKeyCode(nativeKeyCode = event.key)
-        robot.keyRelease(currentKey)
+        val currentKey = convertNativeToWindowsKeyCode(event.key)
+        keyUp(currentKey)
     }
 
     fun handleMousePress(event: EventType.MousePress) {
-        val currentKey = convertMouseKeyCodesToAWTMouseMASK(nativeKeyCode = event.key)
-        handlePress(currentKey, event.timeUnit) { robot.mousePress(currentKey) }
+        handlePress(event.key, event.timeUnit) { keyDown(event.key) }
     }
     fun handleMouseRelease(event: EventType.MouseRelease) {
-        val currentKey = convertMouseKeyCodesToAWTMouseMASK(nativeKeyCode = event.key)
-        robot.mouseRelease(currentKey)
+        mouseUp(event.key)
     }
 
     macro.events.forEach { event ->
@@ -125,90 +121,98 @@ private suspend fun execute(
         }
     }
 }
-private fun convertMouseKeyCodesToAWTMouseMASK(nativeKeyCode: Int): Int {
-    return when (nativeKeyCode) {
-        MouseKeyCodes.BML -> MouseEvent.BUTTON1_DOWN_MASK
-        MouseKeyCodes.BMR -> MouseEvent.BUTTON3_DOWN_MASK
-        else -> throw IllegalArgumentException("Unknown mouse code")
-    }
-}
 
-private fun convertNativeToAWTKeyCode(nativeKeyCode: Int): Int {
+fun convertNativeToWindowsKeyCode(nativeKeyCode: Int): Int {
     return when (nativeKeyCode) {
-        NativeKeyEvent.VC_ESCAPE -> KeyEvent.VK_ESCAPE
-        NativeKeyEvent.VC_F1 -> KeyEvent.VK_F1
-        NativeKeyEvent.VC_F2 -> KeyEvent.VK_F2
-        NativeKeyEvent.VC_F3 -> KeyEvent.VK_F3
-        NativeKeyEvent.VC_F4 -> KeyEvent.VK_F4
-        NativeKeyEvent.VC_F5 -> KeyEvent.VK_F5
-        NativeKeyEvent.VC_F6 -> KeyEvent.VK_F6
-        NativeKeyEvent.VC_F7 -> KeyEvent.VK_F7
-        NativeKeyEvent.VC_F8 -> KeyEvent.VK_F8
-        NativeKeyEvent.VC_F9 -> KeyEvent.VK_F9
-        NativeKeyEvent.VC_F10 -> KeyEvent.VK_F10
-        NativeKeyEvent.VC_F11 -> KeyEvent.VK_F11
-        NativeKeyEvent.VC_F12 -> KeyEvent.VK_F12
-        NativeKeyEvent.VC_DELETE -> KeyEvent.VK_DELETE
-        NativeKeyEvent.VC_BACKQUOTE -> KeyEvent.VK_BACK_QUOTE
-        NativeKeyEvent.VC_1 -> KeyEvent.VK_1
-        NativeKeyEvent.VC_2 -> KeyEvent.VK_2
-        NativeKeyEvent.VC_3 -> KeyEvent.VK_3
-        NativeKeyEvent.VC_4 -> KeyEvent.VK_4
-        NativeKeyEvent.VC_5 -> KeyEvent.VK_5
-        NativeKeyEvent.VC_6 -> KeyEvent.VK_6
-        NativeKeyEvent.VC_7 -> KeyEvent.VK_7
-        NativeKeyEvent.VC_8 -> KeyEvent.VK_8
-        NativeKeyEvent.VC_9 -> KeyEvent.VK_9
-        NativeKeyEvent.VC_0 -> KeyEvent.VK_0
-        NativeKeyEvent.VC_MINUS -> KeyEvent.VK_MINUS
-        NativeKeyEvent.VC_EQUALS -> KeyEvent.VK_EQUALS
-        NativeKeyEvent.VC_BACKSPACE -> KeyEvent.VK_BACK_SPACE
-        NativeKeyEvent.VC_TAB -> KeyEvent.VK_TAB
-        NativeKeyEvent.VC_Q -> KeyEvent.VK_Q
-        NativeKeyEvent.VC_W -> KeyEvent.VK_W
-        NativeKeyEvent.VC_E -> KeyEvent.VK_E
-        NativeKeyEvent.VC_R -> KeyEvent.VK_R
-        NativeKeyEvent.VC_T -> KeyEvent.VK_T
-        NativeKeyEvent.VC_Y -> KeyEvent.VK_Y
-        NativeKeyEvent.VC_U -> KeyEvent.VK_U
-        NativeKeyEvent.VC_I -> KeyEvent.VK_I
-        NativeKeyEvent.VC_O -> KeyEvent.VK_O
-        NativeKeyEvent.VC_P -> KeyEvent.VK_P
-        NativeKeyEvent.VC_OPEN_BRACKET -> KeyEvent.VK_OPEN_BRACKET
-        NativeKeyEvent.VC_CLOSE_BRACKET -> KeyEvent.VK_CLOSE_BRACKET
-        NativeKeyEvent.VC_BACK_SLASH -> KeyEvent.VK_BACK_SLASH
-        NativeKeyEvent.VC_CAPS_LOCK -> KeyEvent.VK_CAPS_LOCK
-        NativeKeyEvent.VC_A -> KeyEvent.VK_A
-        NativeKeyEvent.VC_S -> KeyEvent.VK_S
-        NativeKeyEvent.VC_D -> KeyEvent.VK_D
-        NativeKeyEvent.VC_F -> KeyEvent.VK_F
-        NativeKeyEvent.VC_G -> KeyEvent.VK_G
-        NativeKeyEvent.VC_H -> KeyEvent.VK_H
-        NativeKeyEvent.VC_J -> KeyEvent.VK_J
-        NativeKeyEvent.VC_K -> KeyEvent.VK_K
-        NativeKeyEvent.VC_L -> KeyEvent.VK_L
-        NativeKeyEvent.VC_SEMICOLON -> KeyEvent.VK_SEMICOLON
-        NativeKeyEvent.VC_QUOTE -> KeyEvent.VK_QUOTE
-        NativeKeyEvent.VC_ENTER -> KeyEvent.VK_ENTER
-        NativeKeyEvent.VC_SHIFT -> KeyEvent.VK_SHIFT
-        NativeKeyEvent.VC_Z -> KeyEvent.VK_Z
-        NativeKeyEvent.VC_X -> KeyEvent.VK_X
-        NativeKeyEvent.VC_C -> KeyEvent.VK_C
-        NativeKeyEvent.VC_V -> KeyEvent.VK_V
-        NativeKeyEvent.VC_B -> KeyEvent.VK_B
-        NativeKeyEvent.VC_N -> KeyEvent.VK_N
-        NativeKeyEvent.VC_M -> KeyEvent.VK_M
-        NativeKeyEvent.VC_COMMA -> KeyEvent.VK_COMMA
-        NativeKeyEvent.VC_PERIOD -> KeyEvent.VK_PERIOD
-        NativeKeyEvent.VC_SLASH -> KeyEvent.VK_SLASH
-        NativeKeyEvent.VC_CONTROL -> KeyEvent.VK_CONTROL
-        NativeKeyEvent.VC_HOME -> KeyEvent.VK_HOME
-        NativeKeyEvent.VC_ALT -> KeyEvent.VK_ALT
-        NativeKeyEvent.VC_SPACE -> KeyEvent.VK_SPACE
-        NativeKeyEvent.VC_LEFT -> KeyEvent.VK_LEFT
-        NativeKeyEvent.VC_RIGHT -> KeyEvent.VK_RIGHT
-        NativeKeyEvent.VC_UP -> KeyEvent.VK_UP
-        NativeKeyEvent.VC_DOWN -> KeyEvent.VK_DOWN
-        else -> throw IllegalArgumentException("Unknown key code")
+        NativeKeyEvent.VC_A -> 0x41
+        NativeKeyEvent.VC_B -> 0x42
+        NativeKeyEvent.VC_C -> 0x43
+        NativeKeyEvent.VC_D -> 0x44
+        NativeKeyEvent.VC_E -> 0x45
+        NativeKeyEvent.VC_F -> 0x46
+        NativeKeyEvent.VC_G -> 0x47
+        NativeKeyEvent.VC_H -> 0x48
+        NativeKeyEvent.VC_I -> 0x49
+        NativeKeyEvent.VC_J -> 0x4A
+        NativeKeyEvent.VC_K -> 0x4B
+        NativeKeyEvent.VC_L -> 0x4C
+        NativeKeyEvent.VC_M -> 0x4D
+        NativeKeyEvent.VC_N -> 0x4E
+        NativeKeyEvent.VC_O -> 0x4F
+        NativeKeyEvent.VC_P -> 0x50
+        NativeKeyEvent.VC_Q -> 0x51
+        NativeKeyEvent.VC_R -> 0x52
+        NativeKeyEvent.VC_S -> 0x53
+        NativeKeyEvent.VC_T -> 0x54
+        NativeKeyEvent.VC_U -> 0x55
+        NativeKeyEvent.VC_V -> 0x56
+        NativeKeyEvent.VC_W -> 0x57
+        NativeKeyEvent.VC_X -> 0x58
+        NativeKeyEvent.VC_Y -> 0x59
+        NativeKeyEvent.VC_Z -> 0x5A
+
+        NativeKeyEvent.VC_0 -> 0x30
+        NativeKeyEvent.VC_1 -> 0x31
+        NativeKeyEvent.VC_2 -> 0x32
+        NativeKeyEvent.VC_3 -> 0x33
+        NativeKeyEvent.VC_4 -> 0x34
+        NativeKeyEvent.VC_5 -> 0x35
+        NativeKeyEvent.VC_6 -> 0x36
+        NativeKeyEvent.VC_7 -> 0x37
+        NativeKeyEvent.VC_8 -> 0x38
+        NativeKeyEvent.VC_9 -> 0x39
+
+        NativeKeyEvent.VC_ENTER -> 0x0D
+        NativeKeyEvent.VC_ESCAPE -> 0x1B
+        NativeKeyEvent.VC_BACKSPACE -> 0x08
+        NativeKeyEvent.VC_TAB -> 0x09
+        NativeKeyEvent.VC_SPACE -> 0x20
+
+        NativeKeyEvent.VC_MINUS -> 0xBD
+        NativeKeyEvent.VC_EQUALS -> 0xBB
+        NativeKeyEvent.VC_OPEN_BRACKET -> 0xDB
+        NativeKeyEvent.VC_CLOSE_BRACKET -> 0xDD
+        NativeKeyEvent.VC_BACK_SLASH -> 0xDC
+        NativeKeyEvent.VC_SEMICOLON -> 0xBA
+        NativeKeyEvent.VC_QUOTE -> 0xDE
+        NativeKeyEvent.VC_COMMA -> 0xBC
+        NativeKeyEvent.VC_PERIOD -> 0xBE
+        NativeKeyEvent.VC_SLASH -> 0xBF
+        NativeKeyEvent.VC_BACKQUOTE -> 0xC0
+
+        NativeKeyEvent.VC_SHIFT -> 0x10
+        NativeKeyEvent.VC_CONTROL -> 0x11
+        NativeKeyEvent.VC_ALT -> 0x12
+        NativeKeyEvent.VC_CAPS_LOCK -> 0x14
+
+        NativeKeyEvent.VC_UP -> 0x26
+        NativeKeyEvent.VC_DOWN -> 0x28
+        NativeKeyEvent.VC_LEFT -> 0x25
+        NativeKeyEvent.VC_RIGHT -> 0x27
+
+        NativeKeyEvent.VC_INSERT -> 0x2D
+        NativeKeyEvent.VC_DELETE -> 0x2E
+        NativeKeyEvent.VC_HOME -> 0x24
+        NativeKeyEvent.VC_END -> 0x23
+        NativeKeyEvent.VC_PAGE_UP -> 0x21
+        NativeKeyEvent.VC_PAGE_DOWN -> 0x22
+
+        NativeKeyEvent.VC_NUM_LOCK -> 0x90
+        NativeKeyEvent.VC_SCROLL_LOCK -> 0x91
+
+        NativeKeyEvent.VC_F1 -> 0x70
+        NativeKeyEvent.VC_F2 -> 0x71
+        NativeKeyEvent.VC_F3 -> 0x72
+        NativeKeyEvent.VC_F4 -> 0x73
+        NativeKeyEvent.VC_F5 -> 0x74
+        NativeKeyEvent.VC_F6 -> 0x75
+        NativeKeyEvent.VC_F7 -> 0x76
+        NativeKeyEvent.VC_F8 -> 0x77
+        NativeKeyEvent.VC_F9 -> 0x78
+        NativeKeyEvent.VC_F10 -> 0x79
+        NativeKeyEvent.VC_F11 -> 0x7A
+        NativeKeyEvent.VC_F12 -> 0x7B
+
+        else -> throw IllegalArgumentException("Unsupported NativeKeyEvent code: $nativeKeyCode")
     }
 }
