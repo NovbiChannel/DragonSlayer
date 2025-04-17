@@ -17,6 +17,18 @@ class DefaultCounterComponent(count: Int = DEFAULT_DELAY.toInt()): CounterCompon
     }
 
     override fun decrement() {
-        _model.update { it.copy(count = if (it.count > 0) it.count - 1 else it.count) }
+        _model.update { it.copy(count = it.count - 1) }
+    }
+
+    override fun setTextValue(value: String) {
+        val currentValue = validateValue(value)
+        _model.value = CounterComponent.Model(currentValue)
+    }
+
+    private fun validateValue(value: String): Int {
+        if (value.isBlank()) return 0
+        val intValue = value.toInt()
+        if (intValue < 0) throw IllegalArgumentException("The value cannot be less than zero")
+        return intValue
     }
 }
