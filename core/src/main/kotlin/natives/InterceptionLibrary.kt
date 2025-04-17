@@ -7,13 +7,11 @@ import com.sun.jna.Pointer
 interface InterceptionLibrary : Library {
     companion object {
         val INSTANCE: InterceptionLibrary = Native.load(
-            "libdragon_interception", InterceptionLibrary::class.java
+            "dragonlib_event_hook", InterceptionLibrary::class.java
         )
     }
 
-    fun interception_create_context(): Pointer
-    fun interception_destroy_context(context: Pointer)
-    fun interception_send(context: Pointer, device: Int, stroke: Pointer, nstroke: Int): Int
-    fun interception_is_keyboard(device: Int): Boolean
-    fun interception_is_mouse(device: Int): Boolean
+    fun init_interception(): Int
+    fun send_key(code: Short, is_down: Int)
+    fun release_interception()
 }

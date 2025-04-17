@@ -1,16 +1,22 @@
 package sender
 
-import natives.InterceptionKeyState
-import natives.InterceptionKeyStroke
 import natives.InterceptionLibrary
 
 class InterceptionInputSender : InputSender {
+    val hook = InterceptionLibrary.INSTANCE
+
+    init {
+        val result = hook.init_interception()
+        if (result == 0) {
+            throw IllegalStateException("Interception not initialize")
+        }
+    }
     override fun keyDown(keyCode: Int) {
-        sendKey(1, keyCode.toShort(), true)
+        sendKey(keyCode.toShort(), true)
     }
 
     override fun keyUp(keyCode: Int) {
-        sendKey(1, keyCode.toShort(), false)
+        sendKey(keyCode.toShort(), false)
     }
 
     override fun mouseDown(keyCode: Int) {
@@ -21,15 +27,11 @@ class InterceptionInputSender : InputSender {
         TODO("Not yet implemented")
     }
 
-    private fun sendKey(device: Int, code: Short, isDown: Boolean) {
-        val context = InterceptionLibrary.INSTANCE.interception_create_context()
-        val stroke = InterceptionKeyStroke().apply {
-            this.code = code
-            this.state = if (isDown) InterceptionKeyState.KEY_DOWN.toShort()
-            else InterceptionKeyState.KEY_UP.toShort()
+    private fun sendKey(code: Short, isDown: Boolean) {
+        val isDownInt = when (isDown) {
+            true -> 1
+            else -> 0
         }
-        stroke.write()
-        InterceptionLibrary.INSTANCE.interception_send(context, device, stroke.pointer, 1)
-        InterceptionLibrary.INSTANCE.interception_destroy_context(context)
+        hook.send_key(code, isDownInt)
     }
 }
