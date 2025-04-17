@@ -369,10 +369,7 @@ private fun TimeUnitEditorDialog(
             CounterUI(
                 component = DefaultCounterComponent(timeUnit.value),
                 modifier = Modifier.weight(1f)
-            ) { count ->
-                timeUnit.value = count
-                println(timeUnit.value)
-            }
+            ) { count -> timeUnit.value = count }
             Box {
                 Row(
                     modifier = Modifier

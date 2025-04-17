@@ -70,8 +70,10 @@ fun CounterUI(component: CounterComponent, modifier: Modifier, output: (Int) -> 
                     component.setTextValue(change)
                     false
                 } catch (e: Exception) {
-                    e.printStackTrace()
-                    true
+                    when (e) {
+                        is NumberFormatException -> false
+                        else -> true
+                    }
                 }
             },
             modifier = Modifier

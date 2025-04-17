@@ -2,17 +2,16 @@ package ru.chaglovne.l2.database
 
 import InputType
 import Macro
+import com.dragonslayer.AppConfig
 import inputTypeModule
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import loopTypeModule
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.statements.InsertStatement
 import org.jetbrains.exposed.sql.statements.UpdateBuilder
-import org.jetbrains.exposed.sql.statements.UpdateStatement
 import org.jetbrains.exposed.sql.transactions.transaction
 import ru.chaglovne.l2.database.dao.MacrosDAO
+import ru.chaglovne.l2.database.data.DatabaseConfig
 import ru.chaglovne.l2.database.tables.Macros
 import ru.chaglovne.l2.database.tables.Macros.description
 import ru.chaglovne.l2.database.tables.Macros.events
@@ -22,8 +21,13 @@ import ru.chaglovne.l2.database.tables.Macros.isShowNotification
 import ru.chaglovne.l2.database.tables.Macros.loopType
 import ru.chaglovne.l2.database.tables.Macros.title
 import timeUnitModule
+import java.io.File
 
-class DatabaseManager(private val dbFilePath: String): MacrosDAO {
+class DatabaseManager(appConfig: AppConfig): MacrosDAO {
+
+    val databaseConfig = appConfig.getValue("database", DatabaseConfig.serializer())?: throw IllegalArgumentException(
+        "Failed to initialize database configuration"
+    )
 
     private val json = Json {
         inputTypeModule
@@ -32,12 +36,13 @@ class DatabaseManager(private val dbFilePath: String): MacrosDAO {
     }
 
     init {
+        File(databaseConfig.name)
         connect()
         createTable()
     }
 
     private fun connect() {
-        Database.connect("jdbc:sqlite:$dbFilePath", driver = "org.sqlite.JDBC")
+        Database.connect(databaseConfig.url, driver = databaseConfig.driver)
     }
 
     private fun createTable() {

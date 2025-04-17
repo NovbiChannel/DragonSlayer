@@ -45,7 +45,11 @@ kotlin {
 
 compose.desktop {
     application {
+        val configPath = project.findProperty("configPath") as? String
+            ?: throw GradleException("Укажите путь к конфигу через -PconfigPath=/path/to/config.json")
+
         mainClass = "ru.chaglovne.l2.MainKt"
+        application.args(configPath)
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Exe)

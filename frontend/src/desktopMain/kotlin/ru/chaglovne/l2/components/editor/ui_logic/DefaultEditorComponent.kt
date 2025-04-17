@@ -6,16 +6,16 @@ import EventType
 import InputType
 import LoopType
 import Macro
-import mouse.MouseKeyCode
 import TimeUnit
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.update
-import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent
+import keyboard.WindowsKeyCode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import mouse.MouseKeyCode
 import ru.chaglovne.l2.components.input.ui_logic.DefaultTextInputComponent
 import ru.chaglovne.l2.components.input.ui_logic.TextInputComponent
 import ru.chaglovne.l2.database.DatabaseManager
@@ -111,14 +111,17 @@ class DefaultEditorComponent(
 
     private fun generateTitle(eventType: EventType): String {
         return when(eventType) {
-            is EventType.Delay -> "Задержка " +
-                    eventType.timeUnit.delay() +
-                    eventType.timeUnit.getName()
+            is EventType.Delay -> {
+                val delayValue = eventType.timeUnit.delay()
+                val delayName = eventType.timeUnit.getName()
+
+                "Задержка $delayValue $delayName"
+            }
             is EventType.KeyPress -> "Нажать клавишу " +
-                    NativeKeyEvent.getKeyText(eventType.key) +
+                    WindowsKeyCode.getKeyName(eventType.key) +
                     generateTimeUnitOptions(eventType.timeUnit)
             is EventType.KeyRelease -> "Отпустить клавишу " +
-                    NativeKeyEvent.getKeyText(eventType.key)
+                    WindowsKeyCode.getKeyName(eventType.key)
             is EventType.MousePress -> "Нажать кнопку мыши " +
                     MouseKeyCode.getKeyName(eventType.key) +
                     generateTimeUnitOptions(eventType.timeUnit)
@@ -130,7 +133,7 @@ class DefaultEditorComponent(
     private fun generateTimeUnitOptions(timeUnit: TimeUnit?): String {
         return timeUnit?.let {
             if (timeUnit.value > 0) {
-                ", Интервал нажатия " + timeUnit.value + timeUnit.getName()
+                ", Интервал нажатия ${timeUnit.value} ${timeUnit.getName()}"
             } else { "" }
         }?: ""
     }
@@ -205,9 +208,9 @@ class DefaultEditorComponent(
                 is EventType.KeyPress -> {
                     val updatedType = type.copy(timeUnit = timeUnit)
                     updateEvent(eventId) { event ->
-                        var title = "Нажать клавишу ${NativeKeyEvent.getKeyText(type.key)}"
+                        var title = "Нажать клавишу ${WindowsKeyCode.getKeyName(type.key)}"
                         if (timeUnit.value > 0) {
-                            title = title + ", Интервал нажатия ${timeUnit.value}" + timeUnit.getName()
+                            title = title + ", Интервал нажатия ${timeUnit.value} ${timeUnit.getName()}"
                         }
                         event.copy(
                             eventType = updatedType,
@@ -220,7 +223,7 @@ class DefaultEditorComponent(
                     updateEvent(eventId) { event ->
                         var title = "Нажать кнопку мыши ${MouseKeyCode.getKeyName(type.key)}"
                         if (timeUnit.value > 0) {
-                            title = title + ", Интервал нажатия ${timeUnit.value}" + timeUnit.getName()
+                            title = title + ", Интервал нажатия ${timeUnit.value} ${timeUnit.getName()}"
                         }
                         event.copy(
                             eventType = updatedType,

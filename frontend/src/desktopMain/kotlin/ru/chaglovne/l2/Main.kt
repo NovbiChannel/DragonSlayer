@@ -3,14 +3,12 @@ package ru.chaglovne.l2
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
@@ -20,6 +18,7 @@ import com.arkivanov.decompose.DefaultComponentContext
 import com.arkivanov.decompose.extensions.compose.lifecycle.LifecycleController
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import com.dragon_slayer.firebase.impl.FirebaseAuth
+import com.dragonslayer.JsonAppConfig
 import com.github.kwhat.jnativehook.GlobalScreen
 import dragonslayerfrontend.frontend.generated.resources.Res
 import dragonslayerfrontend.frontend.generated.resources.app_logo
@@ -35,11 +34,13 @@ import java.awt.MouseInfo
 import java.awt.Point
 import java.io.File
 
-fun main() {
+fun main(args: Array<String>) {
     val lifecycle = LifecycleRegistry()
-    val db = File("database.db")
-    val databaseManager = DatabaseManager(db.absolutePath)
-    val firebaseAuth = FirebaseAuth()
+    val configFile = File(args[0])
+    val appConfig = JsonAppConfig.fromFile(configFile)
+    val databaseManager = DatabaseManager(appConfig)
+    val firebaseAuth = FirebaseAuth(appConfig)
+    val appName = appConfig.getString("app_name")
 
     application {
         val root = remember { DefaultRootComponent(DefaultComponentContext(lifecycle), databaseManager, firebaseAuth) }
@@ -56,7 +57,7 @@ fun main() {
             state = windowState,
             icon = painterResource(Res.drawable.app_logo),
             resizable = false,
-            title = "Dragon Slayer"
+            title = appName?: ""
         ) {
             var isDragging by remember { mutableStateOf(false) }
             var dragStartPoint by remember { mutableStateOf(Point(0, 0)) }

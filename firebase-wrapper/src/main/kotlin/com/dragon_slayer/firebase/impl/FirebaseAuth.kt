@@ -6,6 +6,8 @@ import com.dragon_slayer.firebase.data.FirebaseUser
 import com.dragon_slayer.firebase.data.FirebaseUserData
 import com.dragon_slayer.firebase.data.isNotNull
 import com.dragon_slayer.firebase.utils.*
+import com.dragonslayer.AppConfig
+import data.ApiConfig
 import data.Profile
 import data.User
 import decodeToListMacro
@@ -22,15 +24,19 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationException
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import java.util.*
 
-class FirebaseAuth: FirebaseAuthRepository {
-    companion object {
-        private const val BASE_URL = "https://dragon-slayer-1d808-default-rtdb.asia-southeast1.firebasedatabase.app/"
-    }
+class FirebaseAuth(appConfig: AppConfig): FirebaseAuthRepository {
+    private val apiList: List<ApiConfig> = appConfig.getValue("api", ListSerializer(ApiConfig.serializer()))
+        ?: throw IllegalArgumentException("API configuration section 'api' not found")
+
+    private val apiConfig: ApiConfig = apiList.find { it.provider == "firebase" }
+        ?: throw IllegalArgumentException("No Firebase config found in API list")
+
     private val client = HttpClient(CIO) {
         install(ContentNegotiation) {
             json(
@@ -41,7 +47,7 @@ class FirebaseAuth: FirebaseAuthRepository {
         }
         defaultRequest {
             contentType(ContentType.Application.Json)
-            url(BASE_URL)
+            url(apiConfig.baseUrl)
         }
     }
     override suspend fun register(userName: String, password: String): Result<User, DataError> {
